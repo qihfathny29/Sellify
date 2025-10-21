@@ -33,6 +33,7 @@ const upload = multer({
 
 // GET /api/products - Get all products with pagination
 const getProducts = async (req, res) => {
+    console.log('🎯 getProducts called!');  // ← ADD THIS LINE
     try {
         const { page = 1, limit = 10, search = '', category = '' } = req.query;
         const offset = (page - 1) * limit;
@@ -80,7 +81,7 @@ const getProducts = async (req, res) => {
                 p.cost,
                 p.stock,
                 p.min_stock,
-                p.image_url,
+                p.image_url as image,    -- ← ADD THIS ALIAS!
                 p.description,
                 p.is_active,
                 p.created_at,
@@ -129,6 +130,46 @@ const getProducts = async (req, res) => {
     }
 };
 
+const getAllProducts = async (req, res) => {
+  console.log('🎯 getAllProducts called!');  // ← ADD THIS LINE
+  try {
+    let pool = await sql.connect(dbConfig);
+    const query = `
+      SELECT 
+        p.id,
+        p.name,
+        p.barcode,
+        p.price,
+        p.cost,
+        p.stock,
+        p.min_stock,
+        p.image_url as image,    -- ← ALIAS image_url as image
+        p.description,
+        p.is_active as status,
+        c.name as category_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE p.is_active = 1
+      ORDER BY p.name
+    `;
+    
+    const result = await pool.request().query(query);
+    
+    console.log('🔥 Backend products:', result.recordset);
+    
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products'
+    });
+  }
+};
+
 // GET /api/products/:id - Get single product
 const getProductById = async (req, res) => {
     try {
@@ -142,20 +183,17 @@ const getProductById = async (req, res) => {
                     p.id,
                     p.name,
                     p.barcode,
-                    p.category_id,
-                    c.name as category_name,
                     p.price,
                     p.cost,
                     p.stock,
                     p.min_stock,
-                    p.image_url,
+                    p.image_url as image,    -- ← ALIAS image_url as image
                     p.description,
-                    p.is_active,
-                    p.created_at,
-                    p.updated_at
+                    p.is_active as status,
+                    c.name as category_name
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
-                WHERE p.id = @id AND p.is_active = 1
+                WHERE p.id = @id
             `);
 
         await pool.close();
@@ -163,20 +201,19 @@ const getProductById = async (req, res) => {
         if (result.recordset.length === 0) {
             return res.status(404).json({
                 success: false,
-                error: 'Product not found'
+                message: 'Product not found'
             });
         }
-
+        
         res.json({
             success: true,
             data: result.recordset[0]
         });
-
     } catch (error) {
-        console.error('Get product by ID error:', error);
+        console.error('Error fetching product:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch product'
+            message: 'Failed to fetch product'
         });
     }
 };
@@ -489,6 +526,7 @@ const getCategories = async (req, res) => {
 
 module.exports = {
     getProducts,
+    getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
