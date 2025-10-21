@@ -142,12 +142,33 @@ const ProductDetail = () => {
           <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: '#F7E9A0' }}>
             <div className="text-center">
               {product.image ? (
-                <img
-                  src={`http://localhost:5000${product.image}`}
-                  alt={product.name}
-                  className="w-full max-w-md mx-auto object-cover rounded-lg shadow-lg"
-                  style={{ minHeight: '300px', maxHeight: '400px' }}
-                />
+                <div>
+                  <img
+                    src={`http://localhost:5000${product.image}`}
+                    alt={product.name}
+                    className="w-full max-w-md mx-auto object-cover rounded-lg shadow-lg"
+                    style={{ 
+                      minHeight: '300px', 
+                      maxHeight: '400px',
+                      display: 'block'
+                    }}
+                    onError={(e) => {
+                      console.log('Image failed to load:', e.target.src);
+                      e.target.style.display = 'none';
+                      e.target.parentNode.querySelector('.fallback-icon').style.display = 'flex';
+                    }}
+                  />
+                  <div 
+                    className="fallback-icon w-full max-w-md mx-auto flex items-center justify-center rounded-lg shadow-lg"
+                    style={{ 
+                      backgroundColor: '#FFFCF2',
+                      minHeight: '300px',
+                      display: 'none'
+                    }}
+                  >
+                    <span className="text-9xl">📦</span>
+                  </div>
+                </div>
               ) : (
                 <div 
                   className="w-full max-w-md mx-auto flex items-center justify-center rounded-lg shadow-lg"

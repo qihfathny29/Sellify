@@ -21,6 +21,15 @@ const Products = () => {
       
       if (response.data.success) {
         const productsData = response.data.data || [];
+        
+        // DEBUG: Log product data
+        console.log('🔥 Products data:', productsData);
+        productsData.forEach(product => {
+          console.log(`Product: ${product.name}`);
+          console.log(`Image path: ${product.image}`);
+          console.log(`Full URL: http://localhost:5000${product.image}`);
+        });
+        
         setProducts(productsData);
         
         const uniqueCategories = [...new Set(productsData.map(p => p.category_name || 'Uncategorized'))];
@@ -168,34 +177,22 @@ const Products = () => {
               style={{ backgroundColor: '#F7E9A0' }}
               onClick={() => navigate(`/kasir/products/${product.id}`)}
             >
-              {/* Product Image */}
+              {/* SIMPLIFIED IMAGE - NO CONDITIONS */}
               <div className="mb-4 text-center">
-                {product.image ? (
-                  <img
-                    src={`http://localhost:5000${product.image}`}
-                    alt={product.name}
-                    className="w-24 h-24 mx-auto object-cover rounded-lg shadow-md"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'block';
-                    }}
-                  />
-                ) : null}
-                <div 
-                  className="text-6xl"
-                  style={{ display: product.image ? 'none' : 'block' }}
-                >
-                  📦
-                </div>
+                <img
+                  src={`http://localhost:5000${product.image}`}
+                  alt={product.name}
+                  className="w-24 h-24 mx-auto object-cover rounded-lg shadow-md block"
+                />
               </div>
 
               {/* Product Name */}
-              <h3 className="font-bold text-lg mb-3 text-center line-clamp-2" style={{ color: '#3E3E3E' }}>
+              <h3 className="font-bold text-lg mb-3 text-center" style={{ color: '#3E3E3E' }}>
                 {product.name}
               </h3>
               
               {/* Description */}
-              <p className="text-sm opacity-70 mb-4 text-center line-clamp-2" style={{ color: '#3E3E3E' }}>
+              <p className="text-sm opacity-70 mb-4 text-center" style={{ color: '#3E3E3E' }}>
                 {product.description || 'No description available'}
               </p>
 
