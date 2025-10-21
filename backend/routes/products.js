@@ -20,11 +20,11 @@ router.post('/',
   createProduct
 );
 
-// GET /api/products - Get all products (admin only)
-router.get('/', authMiddleware, roleMiddleware(['admin']), getProducts);
+// GET /api/products - Get all products (admin and kasir can read)
+router.get('/', authMiddleware, roleMiddleware(['admin', 'kasir']), getProducts);
 
-// GET /api/products/:id - Get single product (admin only)
-router.get('/:id', authMiddleware, roleMiddleware(['admin']), getProductById);
+// GET /api/products/:id - Get single product (admin and kasir can read)
+router.get('/:id', authMiddleware, roleMiddleware(['admin', 'kasir']), getProductById);
 
 // PUT /api/products/:id - Update product (admin only, with file upload)
 router.put('/:id', 
@@ -37,7 +37,7 @@ router.put('/:id',
 // DELETE /api/products/:id - Delete product (admin only)
 router.delete('/:id', authMiddleware, roleMiddleware(['admin']), deleteProduct);
 
-// GET /api/categories - Get all categories (admin only)
-router.get('/categories/all', authMiddleware, roleMiddleware(['admin']), getCategories);
+// GET /api/categories - Get all categories (admin and kasir can read)
+router.get('/categories/all', authMiddleware, roleMiddleware(['admin', 'kasir']), getCategories);
 
 module.exports = router;
