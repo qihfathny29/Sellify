@@ -35,14 +35,21 @@ const KasirDashboard = () => {
             <p className="text-gray-600">Cashier features will be implemented here.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              <div className="bg-blue-500 text-white p-6 rounded-lg">
-                <h3 className="text-lg font-semibold">New Sale</h3>
-                <p className="mt-2">Process customer transactions</p>
-              </div>
-              <div className="bg-green-500 text-white p-6 rounded-lg">
-                <h3 className="text-lg font-semibold">View Products</h3>
-                <p className="mt-2">Browse available products</p>
-              </div>
+              <button
+                onClick={() => navigate('/kasir/pos')}
+                className="bg-blue-500 text-white p-6 rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200"
+              >
+                <h3 className="text-xl font-bold mb-2">💰 New Sale</h3>
+                <p className="opacity-90">Process customer transactions</p>
+              </button>
+
+              <button
+                onClick={() => navigate('/kasir/products')}
+                className="bg-green-500 text-white p-6 rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200"
+              >
+                <h3 className="text-xl font-bold mb-2">📦 View Products</h3>
+                <p className="opacity-90">Browse available products</p>
+              </button>
             </div>
           </div>
         </div>

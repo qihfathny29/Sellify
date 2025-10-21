@@ -6,13 +6,15 @@ import PrivateRoute from './router/PrivateRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProductManagement from './pages/admin/ProductManagement';
-import KasirDashboard from './pages/kasir/KasirDashboard';
 import Profile from './pages/admin/Profile';
 import Reports  from './pages/admin/Reports';
 import Settings from './pages/admin/Settings';
 import Transactions from './pages/admin/Transactions';
 import UserManagement from './pages/admin/UserManagement';
-
+import KasirDashboard from './pages/kasir/KasirDashboard';
+import POSSystem from './pages/kasir/POSSystem';
+import Products from './pages/kasir/Products';
+import ProductDetail from './pages/kasir/ProductDetail';
 
 function App() {
   const token = localStorage.getItem('token');
@@ -75,6 +77,38 @@ function App() {
             element={
               <PrivateRoute requiredRole="kasir">
                 <KasirDashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/kasir/dashboard"
+            element={
+              <PrivateRoute requiredRole="kasir">
+                <KasirDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route 
+            path="/kasir/pos"
+            element={
+              <PrivateRoute requiredRole="kasir">
+                <POSSystem />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/kasir/products"
+            element={
+              <PrivateRoute requiredRole="kasir">
+                <Products />
+              </PrivateRoute>
+            }
+          />
+          <Route 
+            path="/kasir/products/:id" 
+            element={
+              <PrivateRoute requiredRole="kasir">
+                <ProductDetail />
               </PrivateRoute>
             } 
           />
