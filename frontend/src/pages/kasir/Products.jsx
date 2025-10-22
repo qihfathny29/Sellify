@@ -179,11 +179,17 @@ const Products = () => {
             >
               {/* SIMPLIFIED IMAGE - NO CONDITIONS */}
               <div className="mb-4 text-center">
-                <img
-                  src={`http://localhost:5000${product.image}`}
-                  alt={product.name}
-                  className="w-24 h-24 mx-auto object-cover rounded-lg shadow-md block"
-                />
+                {product.image ? (
+                  <img
+                    src={`http://localhost:5000${product.image}`}
+                    alt={product.name}
+                    className="w-24 h-24 mx-auto object-cover rounded-lg shadow-md block"
+                  />
+                ) : (
+                  <div className="w-24 h-24 mx-auto bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">📦</span>
+                  </div>
+                )}
               </div>
 
               {/* Product Name */}

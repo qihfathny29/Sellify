@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
-import JsBarcode from 'jsbarcode';
 import AdminLayout from '../../components/admin/AdminLayout';
+import JsBarcode from 'jsbarcode';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -31,10 +31,12 @@ const ProductManagement = () => {
       
       // Get products
       const productsResponse = await api.get('/products');
+      console.log('Products response:', productsResponse.data);  // Debug log
       setProducts(productsResponse.data.data);
       
       // Get categories  
-      const categoriesResponse = await api.get('/products/categories/all');
+      const categoriesResponse = await api.get('/products/categories/list');
+      console.log('Categories response:', categoriesResponse.data);
       setCategories(categoriesResponse.data.data);
       
     } catch (error) {
@@ -48,18 +50,16 @@ const ProductManagement = () => {
   const AddProductForm = () => {
     const [formData, setFormData] = useState({
       name: '',
-      barcode: '',
       category_id: '',
       price: '',
       cost: '',
       stock: '',
       min_stock: 5,
-      image: null,        // ← GANTI dari image_url jadi image (File object)
+      image: null,
       description: ''
     });
-    const [imagePreview, setImagePreview] = useState(null); // ← TAMBAH untuk preview
+    const [imagePreview, setImagePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
-    const [barcodeCanvas, setBarcodeCanvas] = useState(null); // Add state for barcode canvas
 
     const handleImageChange = (e) => {
       const file = e.target.files[0];
@@ -85,57 +85,23 @@ const ProductManagement = () => {
       }
     };
 
-    // Add function to generate barcode visual
-    const generateBarcodeVisual = (value) => {
-      if (!value || value.length < 3) {
-        setBarcodeCanvas(null);
-        return;
-      }
-
-      try {
-        // Create canvas element
-        const canvas = document.createElement('canvas');
-        
-        // Generate barcode
-        JsBarcode(canvas, value, {
-          format: "CODE128",
-          width: 2,
-          height: 60,
-          displayValue: true,
-          fontSize: 14,
-          margin: 10,
-          background: "#FFFCF2",
-          lineColor: "#3E3E3E"
-        });
-        
-        setBarcodeCanvas(canvas.toDataURL());
-      } catch (error) {
-        console.error('Barcode generation error:', error);
-        setBarcodeCanvas(null);
-      }
-    };
-
     const handleSubmit = async (e) => {
       e.preventDefault();
       setSubmitting(true);
 
       try {
-        // Auto-calculate min_stock (10% of stock, minimum 1)
         const stock = parseInt(formData.stock) || 0;
         const autoMinStock = Math.max(1, Math.floor(stock * 0.1));
 
-        // Create FormData for file upload
         const submitData = new FormData();
         submitData.append('name', formData.name);
-        submitData.append('barcode', formData.barcode);
         submitData.append('category_id', parseInt(formData.category_id));
         submitData.append('price', parseFloat(formData.price));
         submitData.append('cost', parseFloat(formData.cost) || 0);
         submitData.append('stock', stock);
-        submitData.append('min_stock', autoMinStock); // ← AUTO CALCULATED
+        submitData.append('min_stock', autoMinStock);
         submitData.append('description', formData.description);
         
-        // Add image file if selected
         if (formData.image) {
           submitData.append('image', formData.image);
         }
@@ -158,15 +124,6 @@ const ProductManagement = () => {
       }
     };
 
-    // Update barcode input onChange
-    const handleBarcodeChange = (e) => {
-      const value = e.target.value;
-      setFormData({...formData, barcode: value});
-      
-      // Generate barcode visual in real-time
-      generateBarcodeVisual(value);
-    };
-
     return (
       <div className="rounded-lg shadow-lg p-6 mb-6" style={{ backgroundColor: '#F7E9A0' }}>
         <div className="flex justify-between items-center mb-4">
@@ -184,92 +141,25 @@ const ProductManagement = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Product Name & Barcode with Generator */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Product Name */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Product Name *</label>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
-                }}
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="Enter product name"
-              />
-            </div>
-
-            {/* Barcode with Live Generator */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>
-                Barcode Generator
-                <span className="text-xs opacity-60 ml-1">(Optional)</span>
-              </label>
-              
-              <div className="space-y-3">
-                {/* Input & Auto Generate */}
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    className="flex-1 px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                    style={{ 
-                      borderColor: '#E9C46A',
-                      backgroundColor: '#FFFCF2',
-                      color: '#3E3E3E'
-                    }}
-                    value={formData.barcode}
-                    onChange={handleBarcodeChange}
-                    placeholder="Type: 123456789"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const randomBarcode = Date.now().toString();
-                      setFormData({...formData, barcode: randomBarcode});
-                      generateBarcodeVisual(randomBarcode);
-                    }}
-                    className="px-3 py-2 text-xs rounded-md border-2 hover:opacity-75 transition-all whitespace-nowrap"
-                    style={{ 
-                      backgroundColor: '#E9C46A',
-                      color: '#3E3E3E',
-                      borderColor: '#E9C46A'
-                    }}
-                  >
-                    🎲 Auto
-                  </button>
-                </div>
-
-                {/* Live Barcode Preview */}
-                {barcodeCanvas && (
-                  <div className="p-4 rounded-md border-2 text-center" style={{ 
-                    borderColor: '#E9C46A',
-                    backgroundColor: '#FFFCF2'
-                  }}>
-                    <p className="text-xs mb-2 font-medium" style={{ color: '#3E3E3E' }}>
-                      📊 Live Barcode Preview:
-                    </p>
-                    <img 
-                      src={barcodeCanvas} 
-                      alt="Generated Barcode" 
-                      className="mx-auto block rounded"
-                      style={{ maxWidth: '100%', maxHeight: '80px' }}
-                    />
-                  </div>
-                )}
-
-                <p className="text-xs opacity-60" style={{ color: '#3E3E3E' }}>
-                  💡 Type numbers to see barcode • Min 3 digits • Real-time preview
-                </p>
-              </div>
-            </div>
+          {/* Row 1: Product Name ONLY - HAPUS Barcode Section */}
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Product Name *</label>
+            <input
+              type="text"
+              required
+              className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
+              style={{ 
+                borderColor: '#E9C46A',
+                backgroundColor: '#FFFCF2',
+                color: '#3E3E3E'
+              }}
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              placeholder="Enter product name"
+            />
           </div>
 
-          {/* Row 2: Category & Image Upload */}
+          {/* Row 2: Category & Image Upload - sekarang jadi Row 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Category *</label>
@@ -434,6 +324,7 @@ const ProductManagement = () => {
 
   // Add function to view product details
   const handleViewProduct = (product) => {
+    console.log('Selected product:', product);  // Debug log
     setSelectedProduct(product);
     setShowDetailModal(true);
   };
@@ -464,7 +355,7 @@ const ProductManagement = () => {
       if (selectedProduct?.barcode) {
         generateBarcodeImage(selectedProduct.barcode);
       }
-    }, [selectedProduct]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const generateBarcodeImage = (barcodeValue) => {
       try {
@@ -560,23 +451,27 @@ const ProductManagement = () => {
                 <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>Rp {(selectedProduct.cost || 0).toLocaleString()}</p>
               </div>
 
-              {/* Visual Barcode Section */}
+              {/* Barcode Section */}
               <div>
                 <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Barcode</h3>
                 {selectedProduct.barcode ? (
                   <div className="mt-2">
-                    {barcodeImage ? (
-                      <div className="p-3 rounded-md border-2 bg-white text-center" style={{ borderColor: '#E9C46A' }}>
-                        <img 
-                          src={barcodeImage} 
-                          alt="Product Barcode" 
-                          className="mx-auto block"
-                          style={{ maxWidth: '100%' }}
-                        />
-                      </div>
-                    ) : (
-                      <p className="text-sm" style={{ color: '#3E3E3E' }}>{selectedProduct.barcode}</p>
-                    )}
+                    <div className="p-3 rounded-md border-2 bg-white text-center" style={{ borderColor: '#E9C46A' }}>
+                      {barcodeImage ? (
+                        <div>
+                          <img 
+                            src={barcodeImage} 
+                            alt="Product Barcode" 
+                            className="mx-auto block"
+                            style={{ maxWidth: '100%' }}
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-lg font-mono font-bold" style={{ color: '#3E3E3E' }}>
+                          {selectedProduct.barcode}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm opacity-60" style={{ color: '#3E3E3E' }}>No barcode</p>
@@ -640,7 +535,6 @@ const ProductManagement = () => {
   const EditProductForm = () => {
     const [formData, setFormData] = useState({
       name: editingProduct?.name || '',
-      barcode: editingProduct?.barcode || '',
       category_id: editingProduct?.category_id || '',
       price: editingProduct?.price || '',
       stock: editingProduct?.stock || '',
@@ -659,12 +553,10 @@ const ProductManagement = () => {
       try {
         const submitData = new FormData();
         submitData.append('name', formData.name);
-        submitData.append('barcode', formData.barcode);
         submitData.append('category_id', parseInt(formData.category_id));
         submitData.append('price', parseFloat(formData.price));
         submitData.append('stock', parseInt(formData.stock) || 0);
         
-        // Auto-calculate min_stock
         const stock = parseInt(formData.stock) || 0;
         const autoMinStock = Math.max(1, Math.floor(stock * 0.1));
         submitData.append('min_stock', autoMinStock);

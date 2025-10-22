@@ -97,12 +97,46 @@ const POSSystem = () => {
       // Fetch from real API instead of mock data
       const response = await api.get('/products');
       
+      console.log('🔥 POS - API Response:', response.data); // DEBUG
+      
       if (response.data.success) {
         const productsData = response.data.data || [];
-        // Filter only active products with stock > 0 for POS
-        const activeProducts = productsData.filter(product => 
-          product.status === 1 && product.stock > 0
-        );
+        
+        console.log('🔥 POS - Products Data:', productsData); // DEBUG
+        console.log('🔥 POS - First Product:', productsData[0]); // DEBUG - lihat struktur produk pertama
+        
+        // Debug: Cek field status dan stock dari setiap produk
+        productsData.forEach((product, index) => {
+          console.log(`🔥 Product ${index + 1}:`, {
+            name: product.name,
+            status: product.status,
+            statusType: typeof product.status,
+            stock: product.stock,
+            stockType: typeof product.stock,
+            category_name: product.category_name
+          });
+        });
+        
+        // Filter only active products - PERBAIKAN FILTER untuk boolean
+        const activeProducts = productsData.filter(product => {
+          // Handle boolean status (true/false) instead of 1/0
+          const isActive = product.status === true || product.status === 1 || product.status === '1';
+          // Stock sudah number, tidak perlu konversi
+          const hasStock = product.stock > 0;
+          
+          console.log(`🔥 Filtering ${product.name}:`, {
+            originalStatus: product.status,
+            isActive: isActive,
+            stock: product.stock,
+            hasStock: hasStock,
+            passFilter: isActive && hasStock
+          });
+          
+          return isActive && hasStock;
+        });
+        
+        console.log('🔥 POS - Active Products:', activeProducts); // DEBUG
+        
         setProducts(activeProducts);
         setFilteredProducts(activeProducts);
       } else {
@@ -127,13 +161,13 @@ const POSSystem = () => {
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.barcode.includes(searchTerm)
+        (product.barcode && product.barcode.includes(searchTerm))
       );
     }
 
-    // Category filter
+    // Category filter - PERBAIKAN DI SINI
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(product => product.category === categoryFilter);
+      filtered = filtered.filter(product => product.category_name === categoryFilter);
     }
 
     setFilteredProducts(filtered);
@@ -331,7 +365,8 @@ const POSSystem = () => {
     receiptWindow.print();
   };
 
-  const categories = ['all', ...new Set(products.map(p => p.category))];
+  // PERBAIKAN CATEGORIES - Gunakan category_name seperti di Products.jsx
+  const categories = ['all', ...new Set(products.map(p => p.category_name || 'Uncategorized').filter(Boolean))];
 
   if (loading) {
     return (
@@ -403,7 +438,7 @@ const POSSystem = () => {
               <button
                 key={product.id}
                 onClick={() => addToCart(product)}
-                disabled={product.stock === 0 || product.status !== 1}
+                disabled={product.stock === 0 || product.status !== true} // PERBAIKAN: status !== true
                 className="rounded-lg shadow-lg p-4 text-left transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#F7E9A0' }}
               >
