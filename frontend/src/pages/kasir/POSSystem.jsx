@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import KasirLayout from '../../components/kasir/KasirLayout';
 import api from '../../api/axios';
+import DigitalReceipt from './DigitalReceipt';
 
 const POSSystem = () => {
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,10 @@ const POSSystem = () => {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountPaid, setAmountPaid] = useState('');
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [showDigitalReceipt, setShowDigitalReceipt] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [lastTransaction, setLastTransaction] = useState(null);
+  const navigate = useNavigate();
 
   // Mock products data
   const mockProducts = [
@@ -234,139 +240,129 @@ const POSSystem = () => {
   const total = subtotal + tax;
   const customerChange = amountPaid ? parseFloat(amountPaid) - total : 0;
 
-  // Process payment
+  // Process payment - UPDATE
   const handleProcessPayment = async () => {
-    // Validation
-    if (cart.length === 0) {
-      alert('Keranjang masih kosong!');
+    if (paymentMethod === 'cash' && parseFloat(amountPaid) < total) {
+      alert('Jumlah bayar tidak mencukupi!');
       return;
-    }
-
-    if (paymentMethod === 'cash') {
-      if (!amountPaid || parseFloat(amountPaid) < total) {
-        alert('Jumlah bayar kurang!');
-        return;
-      }
     }
 
     setProcessingPayment(true);
 
     try {
-      // TODO: Real API call to save transaction
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const invoiceNumber = `INV-${Date.now()}`;
-      
-      const transaction = {
-        invoiceNumber,
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString('id-ID'),
-        kasir: user.name || 'Kasir',
+      const transactionData = {
+        id: Date.now(), // Simple ID generation
         items: cart,
-        subtotal,
-        tax,
-        total,
-        paymentMethod,
-        amountPaid: paymentMethod === 'cash' ? parseFloat(amountPaid) : total,
-        customerChange: paymentMethod === 'cash' ? customerChange : 0,
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        payment_method: paymentMethod,
+        amount_paid: parseFloat(amountPaid),
+        change: customerChange,
+        cashier: 'Kasir 1', // Get from auth context
+        transaction_number: `TRX-${Date.now()}`,
+        created_at: new Date().toISOString(),
         status: 'completed'
       };
 
-      // Save to localStorage (temporary)
+      // Save to localStorage for MyTransactions page
       const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-      existingTransactions.push(transaction);
+      existingTransactions.unshift(transactionData); // Add to beginning of array
       localStorage.setItem('transactions', JSON.stringify(existingTransactions));
 
-      // Show success
-      alert(`✅ Transaksi berhasil!\nInvoice: ${invoiceNumber}\nKembalian: Rp ${customerChange.toLocaleString()}`);
+      // Update stock after successful transaction
+      const updatedProducts = products.map(product => {
+        const cartItem = cart.find(item => item.id === product.id);
+        if (cartItem) {
+          // Reduce stock by quantity sold
+          return {
+            ...product,
+            stock: Math.max(0, product.stock - cartItem.quantity)
+          };
+        }
+        return product;
+      });
+      
+      // Update state with reduced stock
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts.filter(product => 
+        product.status === true && product.stock > 0
+      ));
 
-      // Reset
+      // TODO: Send stock update to API
+      // for (const item of cart) {
+      //   await api.patch(`/products/${item.id}`, { 
+      //     stock: updatedProducts.find(p => p.id === item.id)?.stock 
+      //   });
+      // }
+
+      // Save to API (optional)
+      // const response = await api.post('/transactions', transactionData);
+
+      // Show digital receipt instead of printing
+      setLastTransaction(transactionData);
+      setShowDigitalReceipt(true);
+      
+      // Reset form
       setCart([]);
-      setShowPaymentModal(false);
       setAmountPaid('');
-      setPaymentMethod('cash');
-
-      // Print receipt (optional)
-      if (window.confirm('Cetak struk sekarang?')) {
-        printReceipt(transaction);
-      }
-
+      setShowPaymentModal(false);
+      
     } catch (error) {
-      alert('Gagal memproses transaksi: ' + error.message);
+      console.error('Payment error:', error);
+      alert('Gagal memproses pembayaran!');
     } finally {
       setProcessingPayment(false);
     }
   };
 
-  // Print receipt
-  const printReceipt = (transaction) => {
-    const receiptWindow = window.open('', '', 'width=300,height=600');
-    receiptWindow.document.write(`
-      <html>
-        <head>
-          <title>Struk - ${transaction.invoiceNumber}</title>
-          <style>
-            body { font-family: monospace; padding: 20px; }
-            .center { text-align: center; }
-            .line { border-top: 1px dashed #000; margin: 10px 0; }
-            table { width: 100%; }
-          </style>
-        </head>
-        <body>
-          <div class="center">
-            <h2>🏪 SELLIFY</h2>
-            <p>Warung Sembako Digital</p>
-          </div>
-          <div class="line"></div>
-          <p>Invoice: ${transaction.invoiceNumber}</p>
-          <p>Tanggal: ${transaction.date} ${transaction.time}</p>
-          <p>Kasir: ${transaction.kasir}</p>
-          <div class="line"></div>
-          <table>
-            ${transaction.items.map(item => `
-              <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}x</td>
-                <td style="text-align: right">Rp ${(item.price * item.quantity).toLocaleString()}</td>
-              </tr>
-            `).join('')}
-          </table>
-          <div class="line"></div>
-          <table>
-            <tr>
-              <td>Subtotal:</td>
-              <td style="text-align: right">Rp ${transaction.subtotal.toLocaleString()}</td>
-            </tr>
-            <tr>
-              <td>Pajak (10%):</td>
-              <td style="text-align: right">Rp ${transaction.tax.toLocaleString()}</td>
-            </tr>
-            <tr>
-              <td><strong>TOTAL:</strong></td>
-              <td style="text-align: right"><strong>Rp ${transaction.total.toLocaleString()}</strong></td>
-            </tr>
-            <tr>
-              <td>Bayar (${transaction.paymentMethod}):</td>
-              <td style="text-align: right">Rp ${transaction.amountPaid.toLocaleString()}</td>
-            </tr>
-            <tr>
-              <td>Kembalian:</td>
-              <td style="text-align: right">Rp ${transaction.customerChange.toLocaleString()}</td>
-            </tr>
-          </table>
-          <div class="line"></div>
-          <div class="center">
-            <p>Terima Kasih!</p>
-            <p>Selamat Berbelanja Kembali</p>
-          </div>
-        </body>
-      </html>
-    `);
-    receiptWindow.document.close();
-    receiptWindow.print();
+  // Download receipt as image
+  const handleDownloadReceipt = () => {
+    // Using html2canvas library (install: npm install html2canvas)
+    import('html2canvas').then(html2canvas => {
+      const receiptElement = document.getElementById('digital-receipt');
+      html2canvas.default(receiptElement).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `struk-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
+  };
+
+  // Share receipt
+  const handleShareReceipt = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Struk Pembelian - Sellify',
+        text: `Total: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(lastTransaction.total)}`,
+        url: `${window.location.origin}/receipt/${lastTransaction.id || 'digital'}`
+      });
+    } else {
+      // Fallback: copy to clipboard
+      const receiptText = `
+Sellify Store
+${new Date().toLocaleString('id-ID')}
+Total: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(lastTransaction.total)}
+Terimakasih telah berbelanja!
+      `;
+      navigator.clipboard.writeText(receiptText);
+      alert('Link struk disalin ke clipboard!');
+    }
   };
 
   // PERBAIKAN CATEGORIES - Gunakan category_name seperti di Products.jsx
   const categories = ['all', ...new Set(products.map(p => p.category_name || 'Uncategorized').filter(Boolean))];
+
+  // Handler saat tutup struk digital
+  const handleCloseReceipt = () => {
+    setShowDigitalReceipt(false);
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate('/kasir/transactions'); // redirect ke Transaksi Saya
+    }, 1500); // animasi selesai 1.5 detik
+  };
 
   if (loading) {
     return (
@@ -767,6 +763,27 @@ const POSSystem = () => {
                 {processingPayment ? '⏳ Memproses...' : '✅ Konfirmasi Bayar'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Digital Receipt Modal */}
+      {showDigitalReceipt && lastTransaction && (
+        <DigitalReceipt
+          transaction={lastTransaction}
+          onClose={handleCloseReceipt}
+          onDownload={handleDownloadReceipt}
+          onShare={handleShareReceipt}
+        />
+      )}
+
+      {/* Animasi selesai */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white rounded-lg p-8 shadow-lg text-center animate-bounce">
+            <div className="text-4xl mb-2 text-green-500">✅</div>
+            <div className="font-bold text-lg mb-1">Transaksi Selesai!</div>
+            <div className="text-gray-600">Anda akan diarahkan ke halaman Transaksi Saya...</div>
           </div>
         </div>
       )}

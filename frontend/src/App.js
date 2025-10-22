@@ -15,6 +15,7 @@ import KasirDashboard from './pages/kasir/KasirDashboard';
 import POSSystem from './pages/kasir/POSSystem';
 import Products from './pages/kasir/Products';
 import ProductDetail from './pages/kasir/ProductDetail';
+import MyTransactions from './pages/kasir/MyTransactions';
 
 function App() {
   const token = localStorage.getItem('token');
@@ -111,6 +112,14 @@ function App() {
                 <ProductDetail />
               </PrivateRoute>
             } 
+          />
+          <Route 
+            path="/kasir/transactions"
+            element={
+              <PrivateRoute requiredRole="kasir">
+                <MyTransactions />
+              </PrivateRoute>
+            }
           />
           <Route 
             path="/" 
