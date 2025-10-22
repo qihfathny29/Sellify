@@ -143,7 +143,7 @@ const getAllProducts = async (req, res) => {
         p.cost,
         p.stock,
         p.min_stock,
-        p.image_url as image,    -- ← ALIAS image_url as image
+        p.image_url as image,
         p.description,
         p.is_active as status,
         c.name as category_name
@@ -220,96 +220,86 @@ const getProductById = async (req, res) => {
 
 // POST /api/products - Create new product
 const createProduct = async (req, res) => {
-    try {
-        const {
-            name,
-            barcode,
-            category_id,
-            price,
-            cost = 0,
-            stock = 0,
-            min_stock = 5,
-            description = ''
-        } = req.body;
+  try {
+    const { name, category_id, price, cost, stock, min_stock, description } = req.body;
+    
+    // AUTO-GENERATE BARCODE - menggunakan timestamp + random
+    const generateBarcode = () => {
+      const timestamp = Date.now().toString();
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return timestamp + random; // Format: 1729612345123456
+    };
 
-        // Handle image upload
-        let image_url = '';
-        if (req.file) {
-            image_url = `/uploads/products/${req.file.filename}`;
-        }
+    let pool = await sql.connect(dbConfig);
 
-        // Validation
-        if (!name || !price || !category_id) {
-            return res.status(400).json({
-                success: false,
-                error: 'Name, price, and category are required'
-            });
-        }
-
-        let pool = await sql.connect(dbConfig);
-
-        // Check barcode uniqueness
-        if (barcode) {
-            const barcodeCheck = await pool.request()
-                .input('barcode', sql.NVarChar, barcode)
-                .query('SELECT id FROM products WHERE barcode = @barcode');
-
-            if (barcodeCheck.recordset.length > 0) {
-                await pool.close();
-                return res.status(409).json({
-                    success: false,
-                    error: 'Barcode already exists'
-                });
-            }
-        }
-
-        // Insert new product
-        const result = await pool.request()
-            .input('name', sql.NVarChar, name)
-            .input('barcode', sql.NVarChar, barcode || null)
-            .input('category_id', sql.Int, category_id)
-            .input('price', sql.Decimal(15, 2), price)
-            .input('cost', sql.Decimal(15, 2), cost)
-            .input('stock', sql.Int, stock)
-            .input('min_stock', sql.Int, min_stock)
-            .input('image_url', sql.NVarChar, image_url) // ← Use uploaded file path
-            .input('description', sql.NVarChar, description)
-            .query(`
-                INSERT INTO products (name, barcode, category_id, price, cost, stock, min_stock, image_url, description)
-                OUTPUT INSERTED.id
-                VALUES (@name, @barcode, @category_id, @price, @cost, @stock, @min_stock, @image_url, @description)
-            `);
-
-        const newProductId = result.recordset[0].id;
-
-        // Get the created product
-        const newProduct = await pool.request()
-            .input('id', sql.Int, newProductId)
-            .query(`
-                SELECT 
-                  p.id, p.name, p.barcode, p.category_id,
-                  c.name as category_name, p.price, p.cost, p.stock,
-                  p.min_stock, p.image_url, p.description, p.is_active, p.created_at
-                FROM products p
-                LEFT JOIN categories c ON p.category_id = c.id
-                WHERE p.id = @id
-            `);
-
-        await pool.close();
-
-        res.status(201).json({
-            success: true,
-            message: 'Product created successfully',
-            data: newProduct.recordset[0]
-        });
-
-    } catch (error) {
-        console.error('Create product error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to create product'
-        });
+    // Generate unique barcode
+    let barcode = generateBarcode();
+    
+    // Check if barcode already exists, regenerate if needed
+    let existingCheck = await pool.request()
+      .input('barcode', sql.NVarChar, barcode)
+      .query('SELECT id FROM products WHERE barcode = @barcode');
+    
+    while (existingCheck.recordset.length > 0) {
+      barcode = generateBarcode();
+      existingCheck = await pool.request()
+        .input('barcode', sql.NVarChar, barcode)
+        .query('SELECT id FROM products WHERE barcode = @barcode');
     }
+
+    // Handle image upload
+    let image_url = null;
+    if (req.file) {
+      image_url = `/uploads/products/${req.file.filename}`;
+    }
+
+    // Insert product with auto-generated barcode
+    const result = await pool.request()
+      .input('name', sql.NVarChar, name)
+      .input('barcode', sql.NVarChar, barcode)
+      .input('category_id', sql.Int, parseInt(category_id))
+      .input('price', sql.Decimal(10, 2), parseFloat(price))
+      .input('cost', sql.Decimal(10, 2), parseFloat(cost) || 0)
+      .input('stock', sql.Int, parseInt(stock) || 0)
+      .input('min_stock', sql.Int, parseInt(min_stock) || 5)
+      .input('image_url', sql.NVarChar, image_url)
+      .input('description', sql.Text, description || '')
+      .query(`
+        INSERT INTO products (name, barcode, category_id, price, cost, stock, min_stock, image_url, description, is_active) 
+        OUTPUT INSERTED.id
+        VALUES (@name, @barcode, @category_id, @price, @cost, @stock, @min_stock, @image_url, @description, 1)
+      `);
+
+    const newProductId = result.recordset[0].id;
+
+    // Get the created product with category info
+    const productResult = await pool.request()
+      .input('id', sql.Int, newProductId)
+      .query(`
+        SELECT 
+          p.id, p.name, p.barcode, p.category_id, p.price, p.cost, p.stock, p.min_stock, 
+          p.image_url, p.description, p.is_active, p.created_at, p.updated_at,
+          c.name as category_name 
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.id = @id
+      `);
+
+    await pool.close();
+
+    res.status(201).json({
+      success: true,
+      message: `Product created successfully with auto-generated barcode: ${barcode}`,
+      data: productResult.recordset[0]
+    });
+
+  } catch (error) {
+    console.error('Create product error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create product'
+    });
+  }
 };
 
 // PUT /api/products/:id - Update product
