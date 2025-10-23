@@ -22,4 +22,12 @@ const roleMiddleware = (roles) => {
   };
 };
 
-module.exports = roleMiddleware;  // ← Should be default export, not named export
+// Export as named exports for convenience
+const admin = roleMiddleware(['admin']);
+const kasir = roleMiddleware(['kasir', 'admin']); // Admin can also access kasir routes
+
+module.exports = {
+  roleMiddleware,
+  admin,
+  kasir
+};
