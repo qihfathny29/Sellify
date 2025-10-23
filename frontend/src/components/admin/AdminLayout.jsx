@@ -12,7 +12,9 @@ const AdminLayout = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
-    navigate('/login');
+    setShowDropdown(false);
+    // Hard redirect to avoid infinite loop
+    window.location.href = '/login';
   };
 
   const handleProfileClick = () => {

@@ -18,8 +18,11 @@ const KasirLayout = ({ children }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
     localStorage.removeItem('user');
-    navigate('/login');
+    setShowLogoutModal(false);
+    // Hard redirect to avoid infinite loop
+    window.location.href = '/login';
   };
 
   return (
