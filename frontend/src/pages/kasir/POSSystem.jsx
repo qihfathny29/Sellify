@@ -14,6 +14,7 @@ const POSSystem = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountPaid, setAmountPaid] = useState('');
+  const [customerChange, setCustomerChange] = useState(0);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [showDigitalReceipt, setShowDigitalReceipt] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -238,11 +239,20 @@ const POSSystem = () => {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + tax;
-  const customerChange = amountPaid ? parseFloat(amountPaid) - total : 0;
 
-  // Process payment - UPDATE
+  // HAPUS deklarasi duplikat ini jika ada:
+  // const customerChange = amountPaid ? parseFloat(amountPaid) - total : 0;
+
+  // Gunakan useEffect untuk update customerChange state secara reaktif
+  useEffect(() => {
+    const paid = parseFloat(amountPaid || 0);
+    const change = Number.isFinite(paid) ? Math.max(0, paid - total) : 0;
+    setCustomerChange(change);
+  }, [amountPaid, total]);
+
+  // Process payment - UPDATE untuk menghitung kembalian & kirim ke backend
   const handleProcessPayment = async () => {
-    if (paymentMethod === 'cash' && parseFloat(amountPaid) < total) {
+    if (paymentMethod === 'cash' && parseFloat(amountPaid || 0) < total) {
       alert('Jumlah bayar tidak mencukupi!');
       return;
     }
@@ -250,64 +260,47 @@ const POSSystem = () => {
     setProcessingPayment(true);
 
     try {
+      const paidValue = parseFloat(amountPaid || 0);
+      const changeAmount = Math.max(0, paidValue - total);
+
       const transactionData = {
-        id: Date.now(), // Simple ID generation
         items: cart,
         subtotal: subtotal,
         tax: tax,
         total: total,
         payment_method: paymentMethod,
-        amount_paid: parseFloat(amountPaid),
-        change: customerChange,
-        cashier: 'Kasir 1', // Get from auth context
-        transaction_number: `TRX-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        status: 'completed'
+        amount_paid: paidValue,
+        change_amount: changeAmount
       };
 
-      // Save to localStorage for MyTransactions page
-      const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-      existingTransactions.unshift(transactionData); // Add to beginning of array
-      localStorage.setItem('transactions', JSON.stringify(existingTransactions));
+      // Save to database
+      const response = await api.post('/transactions', transactionData);
 
-      // Update stock after successful transaction
-      const updatedProducts = products.map(product => {
-        const cartItem = cart.find(item => item.id === product.id);
-        if (cartItem) {
-          // Reduce stock by quantity sold
-          return {
-            ...product,
-            stock: Math.max(0, product.stock - cartItem.quantity)
-          };
-        }
-        return product;
-      });
-      
-      // Update state with reduced stock
-      setProducts(updatedProducts);
-      setFilteredProducts(updatedProducts.filter(product => 
-        product.status === true && product.stock > 0
-      ));
+      if (response.data.success) {
+        // update local stock, etc...
+        // ...existing code...
 
-      // TODO: Send stock update to API
-      // for (const item of cart) {
-      //   await api.patch(`/products/${item.id}`, { 
-      //     stock: updatedProducts.find(p => p.id === item.id)?.stock 
-      //   });
-      // }
+        // Prepare transaction data for receipt — pastikan change ikut
+        const receiptData = {
+          ...transactionData,
+          id: response.data.data.id,
+          transaction_number: response.data.data.transaction_code,
+          cashier: 'Kasir',
+          created_at: new Date().toISOString(),
+          change: changeAmount, // legacy fallback
+          change_amount: changeAmount
+        };
 
-      // Save to API (optional)
-      // const response = await api.post('/transactions', transactionData);
+        setLastTransaction(receiptData);
+        setShowDigitalReceipt(true);
 
-      // Show digital receipt instead of printing
-      setLastTransaction(transactionData);
-      setShowDigitalReceipt(true);
-      
-      // Reset form
-      setCart([]);
-      setAmountPaid('');
-      setShowPaymentModal(false);
-      
+        // Reset form
+        setCart([]);
+        setAmountPaid('');
+        setShowPaymentModal(false);
+      } else {
+        throw new Error('Failed to save transaction');
+      }
     } catch (error) {
       console.error('Payment error:', error);
       alert('Gagal memproses pembayaran!');

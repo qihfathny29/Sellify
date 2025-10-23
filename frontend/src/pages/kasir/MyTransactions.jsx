@@ -10,32 +10,63 @@ const MyTransactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchTransactions();
   }, []);
 
-  // Load saved transactions from localStorage (temporary solution)
+  // Load transactions from database
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      // Coba ambil dari API dulu
-      const response = await api.get('/transactions/my');
-      if (response.data?.success && response.data.data?.length > 0) {
-        setTransactions(response.data.data);
-      } else {
-        // Fallback ke localStorage jika API belum ada
-        const savedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-        setTransactions(savedTransactions);
+      const response = await api.get('/transactions/my-transactions');
+      if (response.data.success) {
+        const transactions = response.data.data.map(transaction => ({
+          id: transaction.id,
+          transaction_number: transaction.transaction_code,
+          total: transaction.total_amount,
+          payment_method: transaction.payment_method,
+          amount_paid: transaction.payment_amount,
+          change: transaction.change_amount,
+          status: transaction.status,
+          created_at: transaction.created_at,
+          item_count: transaction.item_count
+        }));
+        setTransactions(transactions);
       }
     } catch (error) {
-      console.log('API not available, using localStorage');
-      // Fallback ke localStorage
-      const savedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-      setTransactions(savedTransactions);
+      console.error('Failed to fetch transactions:', error);
+      setTransactions([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch full transaction detail for modal
+  const fetchTransactionDetail = async (id) => {
+    setDetailLoading(true);
+    try {
+      const response = await api.get(`/transactions/${id}`);
+      if (response.data.success) {
+        const data = response.data.data;
+        // Hitung subtotal dari items (sum total_price)
+        const subtotal = data.items.reduce((sum, item) => sum + (item.total_price || (item.quantity * item.unit_price)), 0);
+        // Pajak = total - subtotal (asumsi 10%)
+        const tax = data.total_amount - subtotal;
+        setSelectedTransaction({
+          ...data,
+          subtotal,
+          tax
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch transaction detail:', error);
+      alert('Gagal memuat detail transaksi!');
+    } finally {
+      setDetailLoading(false);
+      setShowDetailModal(true);
     }
   };
 
@@ -64,6 +95,40 @@ const MyTransactions = () => {
     }
   });
 
+  // Format tanggal & waktu - FINAL FIX: Handle ISO UTC ('T' & 'Z') langsung, tampil raw time dengan kolon
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return 'Tanggal tidak valid';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Tanggal tidak valid';
+    // Format sebagai UTC biar match raw jam dari API/DB (no +7 adjust)
+    let formatted = new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }).format(date);
+    // Ganti titik (.) ke kolon (:) biar konsisten
+    return formatted.replace(/\./g, ':');
+  };
+
+  const formatDateTimeWithSeconds = (dateStr) => {
+    if (!dateStr) return 'Tanggal tidak valid';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Tanggal tidak valid';
+    let formatted = new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'UTC'
+    }).format(date);
+    return formatted.replace(/\./g, ':');
+  };
+
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
@@ -75,8 +140,7 @@ const MyTransactions = () => {
 
   // Show transaction detail
   const showTransactionDetail = (transaction) => {
-    setSelectedTransaction(transaction);
-    setShowDetailModal(true);
+    fetchTransactionDetail(transaction.id);
   };
 
   // Get payment method color
@@ -222,19 +286,7 @@ const MyTransactions = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-sm" style={{ color: '#3E3E3E' }}>
-                          {(() => {
-                            const date = new Date(transaction.created_at);
-                            if (isNaN(date.getTime())) {
-                              return 'Tanggal tidak valid';
-                            }
-                            return date.toLocaleString('id-ID', {
-                              day: '2-digit',
-                              month: '2-digit', 
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            });
-                          })()}
+                          {formatDateTime(transaction.created_at)}
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -242,7 +294,7 @@ const MyTransactions = () => {
                           {formatCurrency(transaction.total || 0)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {transaction.items?.length || 0} item(s)
+                          {transaction.item_count || 0} item(s)
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -280,10 +332,7 @@ const MyTransactions = () => {
                         {transaction.transaction_number || `TRX-${transaction.id || index + 1}`}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {(() => {
-                          const date = new Date(transaction.created_at);
-                          return isNaN(date.getTime()) ? 'Tanggal tidak valid' : date.toLocaleString('id-ID');
-                        })()}
+                        {formatDateTime(transaction.created_at)}
                       </div>
                     </div>
                     <div className="text-right">
@@ -328,75 +377,83 @@ const MyTransactions = () => {
               </div>
               
               <div className="p-4">
-                {/* Transaction Info */}
-                <div className="mb-4">
-                  <div className="text-sm text-gray-600">Nomor Transaksi</div>
-                  <div className="font-medium" style={{ color: '#3E3E3E' }}>
-                    {selectedTransaction.transaction_number || `TRX-${selectedTransaction.id}`}
+                {detailLoading ? (
+                  <div className="text-center py-8">
+                    <div className="text-2xl mb-2">⏳</div>
+                    <p style={{ color: '#3E3E3E' }}>Memuat detail...</p>
                   </div>
-                </div>
-                
-                <div className="mb-4">
-                  <div className="text-sm text-gray-600">Tanggal & Waktu</div>
-                  <div className="font-medium" style={{ color: '#3E3E3E' }}>
-                    {(() => {
-                      const date = new Date(selectedTransaction.created_at);
-                      return isNaN(date.getTime()) ? 'Tanggal tidak valid' : date.toLocaleString('id-ID');
-                    })()}
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Transaction Info */}
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-600">Nomor Transaksi</div>
+                      <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                        {selectedTransaction.transaction_code || `TRX-${selectedTransaction.id}`}
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-600">Tanggal & Waktu</div>
+                      <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                        {formatDateTimeWithSeconds(selectedTransaction.created_at)}
+                      </div>
+                    </div>
 
-                {/* Items */}
-                <div className="mb-4">
-                  <div className="text-sm text-gray-600 mb-2">Item Dibeli</div>
-                  <div className="space-y-2">
-                    {selectedTransaction.items?.map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-gray-500">{item.quantity} x {formatCurrency(item.price)}</div>
+                    {/* Items */}
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-600 mb-2">Item Dibeli</div>
+                      <div className="space-y-2">
+                        {selectedTransaction.items?.length > 0 ? (
+                          selectedTransaction.items.map((item, idx) => (
+                            <div key={idx} className="flex justify-between text-sm">
+                              <div>
+                                <div className="font-medium">{item.product_name || item.name}</div>
+                                <div className="text-gray-500">{item.quantity} x {formatCurrency(item.unit_price || item.price)}</div>
+                              </div>
+                              <div className="font-medium">
+                                {formatCurrency(item.total_price || (item.quantity * (item.unit_price || item.price)))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-gray-500 text-sm">Tidak ada detail item</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Payment Summary */}
+                    <div className="border-t pt-4">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Subtotal</span>
+                          <span>{formatCurrency(selectedTransaction.subtotal || 0)}</span>
                         </div>
-                        <div className="font-medium">
-                          {formatCurrency(item.quantity * item.price)}
+                        <div className="flex justify-between">
+                          <span>Pajak</span>
+                          <span>{formatCurrency(selectedTransaction.tax || 0)}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg border-t pt-2">
+                          <span>Total</span>
+                          <span className="text-green-600">{formatCurrency(selectedTransaction.total_amount || selectedTransaction.total || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Metode Pembayaran</span>
+                          <span className={`px-2 py-1 rounded text-xs ${getPaymentMethodColor(selectedTransaction.payment_method)}`}>
+                            {getPaymentMethodIcon(selectedTransaction.payment_method)} {selectedTransaction.payment_method || 'Cash'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Dibayar</span>
+                          <span>{formatCurrency(selectedTransaction.payment_amount || selectedTransaction.amount_paid || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Kembalian</span>
+                          <span>{formatCurrency(selectedTransaction.change_amount || selectedTransaction.change || 0)}</span>
                         </div>
                       </div>
-                    )) || (
-                      <div className="text-gray-500 text-sm">Tidak ada detail item</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Payment Summary */}
-                <div className="border-t pt-4">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span>{formatCurrency(selectedTransaction.subtotal || 0)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Pajak</span>
-                      <span>{formatCurrency(selectedTransaction.tax || 0)}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg border-t pt-2">
-                      <span>Total</span>
-                      <span className="text-green-600">{formatCurrency(selectedTransaction.total || 0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Metode Pembayaran</span>
-                      <span className={`px-2 py-1 rounded text-xs ${getPaymentMethodColor(selectedTransaction.payment_method)}`}>
-                        {getPaymentMethodIcon(selectedTransaction.payment_method)} {selectedTransaction.payment_method || 'Cash'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Dibayar</span>
-                      <span>{formatCurrency(selectedTransaction.amount_paid || 0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Kembalian</span>
-                      <span>{formatCurrency(selectedTransaction.change || 0)}</span>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
 
               <div className="p-4 border-t bg-gray-50">

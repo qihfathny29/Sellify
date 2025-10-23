@@ -17,7 +17,7 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await api.post('/login', credentials);
+      const response = await api.post('/auth/login', credentials);
       const { token, role } = response.data;
       
       localStorage.setItem('token', token);

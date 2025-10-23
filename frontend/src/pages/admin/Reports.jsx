@@ -20,39 +20,47 @@ const Reports = () => {
   const fetchReportData = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/reports/dashboard?range=${dateRange}`);
-      setReportData(response.data.data);
+      // Fetch all report data in parallel
+      const [statsRes, trendRes, categoryRes, productsRes] = await Promise.all([
+        api.get(`/reports/dashboard-stats?period=${dateRange}`),
+        api.get(`/reports/revenue-trend`),
+        api.get(`/reports/sales-by-category?period=${dateRange}`),
+        api.get(`/reports/top-products?period=${dateRange}&limit=5`)
+      ]);
+
+      // Process data
+      const stats = statsRes.data.data;
+      const trend = trendRes.data.data;
+      const categories = categoryRes.data.data;
+      const products = productsRes.data.data;
+
+      // Calculate total for percentage
+      const totalCategorySales = categories.reduce((sum, cat) => sum + parseFloat(cat.total_sales || 0), 0);
+
+      setReportData({
+        totalRevenue: stats.total_revenue || 0,
+        totalTransactions: stats.total_transactions || 0,
+        totalItems: stats.items_sold || 0,
+        averageTransaction: stats.avg_transaction || 0,
+        topProducts: products.map(p => ({
+          name: p.name,
+          sold: p.total_sold,
+          revenue: parseFloat(p.total_revenue)
+        })),
+        salesByCategory: categories.map(cat => ({
+          category: cat.category,
+          percentage: totalCategorySales > 0 ? Math.round((parseFloat(cat.total_sales) / totalCategorySales) * 100) : 0,
+          revenue: parseFloat(cat.total_sales)
+        })),
+        revenueChart: trend.map(t => ({
+          day: t.day_name.substring(0, 3), // Mon, Tue, etc
+          revenue: parseFloat(t.revenue)
+        })),
+        profitMargin: 35 // This would need to be calculated based on cost data
+      });
     } catch (error) {
       console.error('Failed to fetch report data:', error);
-      // Mock data for development
-      setReportData({
-        totalRevenue: 2500000,
-        totalTransactions: 75,
-        totalItems: 150,
-        averageTransaction: 33333,
-        topProducts: [
-          { name: 'Chitato Keju', sold: 50, revenue: 500000 },
-          { name: 'Indomie Goreng', sold: 45, revenue: 450000 },
-          { name: 'Aqua 600ml', sold: 40, revenue: 200000 },
-          { name: 'Teh Botol', sold: 35, revenue: 175000 },
-          { name: 'Oreo', sold: 30, revenue: 300000 }
-        ],
-        salesByCategory: [
-          { category: 'Makanan Ringan', percentage: 45, revenue: 1125000 },
-          { category: 'Minuman', percentage: 30, revenue: 750000 },
-          { category: 'Kebutuhan Harian', percentage: 25, revenue: 625000 }
-        ],
-        revenueChart: [
-          { day: 'Mon', revenue: 300000 },
-          { day: 'Tue', revenue: 450000 },
-          { day: 'Wed', revenue: 380000 },
-          { day: 'Thu', revenue: 520000 },
-          { day: 'Fri', revenue: 480000 },
-          { day: 'Sat', revenue: 650000 },
-          { day: 'Sun', revenue: 590000 }
-        ],
-        profitMargin: 35
-      });
+      alert('Gagal mengambil data laporan: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -60,6 +68,7 @@ const Reports = () => {
 
   useEffect(() => {
     fetchReportData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange]);
 
   if (loading) {

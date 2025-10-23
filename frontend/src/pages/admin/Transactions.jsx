@@ -6,169 +6,80 @@ const Transactions = () => {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [cashiers, setCashiers] = useState([]); // TAMBAH INI
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('today');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [kasirFilter, setKasirFilter] = useState('all'); // NEW!
+  const [kasirFilter, setKasirFilter] = useState('all');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // Mock data for development
-  const mockTransactions = [
-    {
-      id: 1,
-      invoiceNumber: 'INV-2025-001',
-      date: '2025-10-18',
-      time: '14:30:25',
-      kasir: 'Siti Nurjana',
-      items: [
-        { name: 'Chitato Keju', quantity: 2, price: 15000, total: 30000 },
-        { name: 'Aqua 600ml', quantity: 3, price: 5000, total: 15000 }
-      ],
-      subtotal: 45000,
-      tax: 4500,
-      total: 49500,
-      paymentMethod: 'Cash',
-      status: 'completed',
-      customerChange: 500,
-      amountPaid: 50000
-    },
-    {
-      id: 2,
-      invoiceNumber: 'INV-2025-002',
-      date: '2025-10-18',
-      time: '15:45:12',
-      kasir: 'Budi Santoso',
-      items: [
-        { name: 'Indomie Goreng', quantity: 5, price: 3500, total: 17500 },
-        { name: 'Teh Botol', quantity: 2, price: 4000, total: 8000 },
-        { name: 'Oreo', quantity: 1, price: 12000, total: 12000 }
-      ],
-      subtotal: 37500,
-      tax: 3750,
-      total: 41250,
-      paymentMethod: 'QRIS',
-      status: 'completed',
-      customerChange: 0,
-      amountPaid: 41250
-    },
-    {
-      id: 3,
-      invoiceNumber: 'INV-2025-003',
-      date: '2025-10-18',
-      time: '16:20:08',
-      kasir: 'Maya Sari',
-      items: [
-        { name: 'Beng-beng', quantity: 10, price: 2500, total: 25000 }
-      ],
-      subtotal: 25000,
-      tax: 2500,
-      total: 27500,
-      paymentMethod: 'Cash',
-      status: 'void',
-      customerChange: 0,
-      amountPaid: 0,
-      voidReason: 'Customer cancelled order'
-    },
-    {
-      id: 4,
-      invoiceNumber: 'INV-2025-004',
-      date: '2025-10-17',
-      time: '10:15:30',
-      kasir: 'Siti Nurjana',
-      items: [
-        { name: 'Mie Sedaap', quantity: 3, price: 3000, total: 9000 },
-        { name: 'Coca Cola', quantity: 2, price: 6000, total: 12000 }
-      ],
-      subtotal: 21000,
-      tax: 2100,
-      total: 23100,
-      paymentMethod: 'Bank Transfer',
-      status: 'completed',
-      customerChange: 0,
-      amountPaid: 23100
-    },
-    {
-      id: 5,
-      invoiceNumber: 'INV-2025-005',
-      date: '2025-10-18',
-      time: '17:30:45',
-      kasir: 'Budi Santoso',
-      items: [
-        { name: 'Kopiko', quantity: 8, price: 1500, total: 12000 },
-        { name: 'Sprite', quantity: 1, price: 7000, total: 7000 }
-      ],
-      subtotal: 19000,
-      tax: 1900,
-      total: 20900,
-      paymentMethod: 'Cash',
-      status: 'completed',
-      customerChange: 100,
-      amountPaid: 21000
-    }
-  ];
-
-  // Fetch transactions data
+  // GANTI fetchTransactions dengan API call yang beneran
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
+      // Prepare query params
+      const params = new URLSearchParams();
+      
+      // Date filter
+      const today = new Date();
+      if (dateFilter === 'today') {
+        params.append('startDate', today.toISOString().split('T')[0]);
+        params.append('endDate', today.toISOString().split('T')[0]);
+      } else if (dateFilter === 'yesterday') {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        params.append('startDate', yesterday.toISOString().split('T')[0]);
+        params.append('endDate', yesterday.toISOString().split('T')[0]);
+      } else if (dateFilter === 'week') {
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        params.append('startDate', weekAgo.toISOString().split('T')[0]);
+        params.append('endDate', today.toISOString().split('T')[0]);
+      } else if (dateFilter === 'month') {
+        const monthAgo = new Date(today);
+        monthAgo.setDate(monthAgo.getDate() - 30);
+        params.append('startDate', monthAgo.toISOString().split('T')[0]);
+        params.append('endDate', today.toISOString().split('T')[0]);
+      }
+      
+      if (kasirFilter !== 'all') params.append('cashier_id', kasirFilter);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await api.get(`/transactions/admin/all?${params.toString()}`);
+      
+      if (response.data.success) {
+        setTransactions(response.data.data);
+        setFilteredTransactions(response.data.data);
+      }
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
+      alert('Gagal mengambil data transaksi: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter transactions - UPDATED!
+  // Fetch cashiers for filter - TAMBAH INI
+  const fetchCashiers = async () => {
+    try {
+      const response = await api.get('/transactions/admin/cashiers');
+      if (response.data.success) {
+        setCashiers(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch cashiers:', error);
+    }
+  };
+
   useEffect(() => {
-    let filtered = transactions;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(transaction => 
-        transaction.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.kasir.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Date filter
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-    const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-
-    if (dateFilter === 'today') {
-      filtered = filtered.filter(transaction => transaction.date === today);
-    } else if (dateFilter === 'yesterday') {
-      filtered = filtered.filter(transaction => transaction.date === yesterday);
-    } else if (dateFilter === 'week') {
-      filtered = filtered.filter(transaction => transaction.date >= weekAgo);
-    } else if (dateFilter === 'month') {
-      filtered = filtered.filter(transaction => transaction.date >= monthAgo);
-    }
-
-    // Kasir filter - NEW!
-    if (kasirFilter !== 'all') {
-      filtered = filtered.filter(transaction => transaction.kasir === kasirFilter);
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(transaction => transaction.status === statusFilter);
-    }
-
-    setFilteredTransactions(filtered);
-  }, [transactions, searchTerm, dateFilter, kasirFilter, statusFilter]);
+    fetchCashiers();
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [dateFilter, kasirFilter, statusFilter, searchTerm]);
 
   const getStatusBadge = (status) => {
     const styles = {
@@ -296,9 +207,11 @@ const Transactions = () => {
                 onChange={(e) => setKasirFilter(e.target.value)}
               >
                 <option value="all">👥 Semua Kasir</option>
-                <option value="Siti Nurjana">👩 Siti Nurjana</option>
-                <option value="Budi Santoso">👨 Budi Santoso</option>
-                <option value="Maya Sari">👩 Maya Sari</option>
+                {cashiers.map(cashier => (
+                  <option key={cashier.id_user} value={cashier.id_user}>
+                    👤 {cashier.full_name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -375,8 +288,8 @@ const Transactions = () => {
               <p className="text-2xl font-bold text-green-600">
                 Rp {filteredTransactions
                   .filter(t => t.status === 'completed')
-                  .reduce((sum, t) => sum + t.total, 0)
-                  .toLocaleString()}
+                  .reduce((sum, t) => sum + (t.total_amount || 0), 0)
+                  .toLocaleString('id-ID')}
               </p>
               <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Total Revenue</p>
             </div>
@@ -438,29 +351,31 @@ const Transactions = () => {
                   <tr key={transaction.id} className={index % 2 === 0 ? '' : 'bg-opacity-50'} style={{ backgroundColor: index % 2 === 0 ? 'transparent' : '#FFFCF2' }}>
                     <td className="px-6 py-4">
                       <p className="font-medium" style={{ color: '#3E3E3E' }}>
-                        {transaction.invoiceNumber}
+                        {transaction.transaction_code}
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p style={{ color: '#3E3E3E' }}>{transaction.date}</p>
+                      <p style={{ color: '#3E3E3E' }}>
+                        {new Date(transaction.created_at).toLocaleDateString('id-ID')}
+                      </p>
                       <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>
-                        {transaction.time}
+                        {new Date(transaction.created_at).toLocaleTimeString('id-ID')}
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p style={{ color: '#3E3E3E' }}>{transaction.kasir}</p>
+                      <p style={{ color: '#3E3E3E' }}>{transaction.cashier_name || transaction.username}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p style={{ color: '#3E3E3E' }}>{transaction.items.length} items</p>
+                      <p style={{ color: '#3E3E3E' }}>{transaction.item_count} item(s)</p>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-bold" style={{ color: '#3E3E3E' }}>
-                        Rp {transaction.total.toLocaleString()}
+                        Rp {transaction.total_amount?.toLocaleString('id-ID')}
                       </p>
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}>
-                        {transaction.paymentMethod}
+                        {transaction.payment_method}
                       </span>
                     </td>
                     <td className="px-6 py-4">
