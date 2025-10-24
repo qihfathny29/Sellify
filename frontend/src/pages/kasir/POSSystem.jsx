@@ -362,8 +362,8 @@ Terimakasih telah berbelanja!
       <KasirLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#E9C46A' }}></div>
-            <p style={{ color: '#3E3E3E' }}>Loading POS...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#2C3E50' }}></div>
+            <p style={{ color: '#2C3E50' }}>Loading POS...</p>
           </div>
         </div>
       </KasirLayout>
@@ -377,14 +377,14 @@ Terimakasih telah berbelanja!
         <div className="lg:col-span-2 space-y-4">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>💰 POS System</h1>
-            <p className="opacity-70 mt-1" style={{ color: '#3E3E3E' }}>
+            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>💰 POS System</h1>
+            <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
               Pilih produk untuk memulai transaksi
             </p>
           </div>
 
           {/* Search & Filter */}
-          <div className="rounded-lg shadow-lg p-4" style={{ backgroundColor: '#F7E9A0' }}>
+          <div className="rounded-lg shadow-lg p-4" style={{ backgroundColor: '#FFFFFF' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}
               <input
@@ -392,9 +392,9 @@ Terimakasih telah berbelanja!
                 placeholder="🔍 Cari produk atau scan barcode..."
                 className="w-full px-4 py-2 border-2 rounded-md focus:outline-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F5F5F5',
+                  color: '#2C3E50'
                 }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -405,9 +405,9 @@ Terimakasih telah berbelanja!
               <select
                 className="w-full px-4 py-2 border-2 rounded-md focus:outline-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F5F5F5',
+                  color: '#2C3E50'
                 }}
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
@@ -429,7 +429,7 @@ Terimakasih telah berbelanja!
                 onClick={() => addToCart(product)}
                 disabled={product.stock === 0 || product.status !== true} // PERBAIKAN: status !== true
                 className="rounded-lg shadow-lg p-4 text-left transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#F7E9A0' }}
+                style={{ backgroundColor: '#FFFFFF' }}
               >
                 {/* Product Image */}
                 <div className="mb-2">
@@ -452,13 +452,13 @@ Terimakasih telah berbelanja!
                   </div>
                 </div>
                 
-                <h3 className="font-bold text-sm mb-1" style={{ color: '#3E3E3E' }}>
+                <h3 className="font-bold text-sm mb-1" style={{ color: '#2C3E50' }}>
                   {product.name}
                 </h3>
-                <p className="text-xs opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <p className="text-xs opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                   {product.category_name || 'Uncategorized'}
                 </p>
-                <p className="font-bold text-lg" style={{ color: '#3E3E3E' }}>
+                <p className="font-bold text-lg" style={{ color: '#2C3E50' }}>
                   Rp {parseFloat(product.price || 0).toLocaleString('id-ID')}
                 </p>
                 <p className="text-xs mt-1" style={{ color: product.stock < 10 ? '#FF5722' : '#4CAF50' }}>
@@ -469,17 +469,17 @@ Terimakasih telah berbelanja!
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-8 rounded-lg" style={{ backgroundColor: '#F7E9A0' }}>
-              <p className="text-xl" style={{ color: '#3E3E3E' }}>📭</p>
-              <p style={{ color: '#3E3E3E' }}>Produk tidak ditemukan</p>
+            <div className="text-center py-8 rounded-lg" style={{ backgroundColor: '#FFFFFF' }}>
+              <p className="text-xl" style={{ color: '#2C3E50' }}>📭</p>
+              <p style={{ color: '#2C3E50' }}>Produk tidak ditemukan</p>
             </div>
           )}
         </div>
 
         {/* Right Side - Shopping Cart */}
         <div className="lg:col-span-1">
-          <div className="rounded-lg shadow-lg p-6 sticky top-6" style={{ backgroundColor: '#F7E9A0' }}>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+          <div className="rounded-lg shadow-lg p-6 sticky top-6" style={{ backgroundColor: '#FFFFFF' }}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: '#2C3E50' }}>
               🛒 Keranjang
             </h2>
 
@@ -488,19 +488,19 @@ Terimakasih telah berbelanja!
               {cart.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-4xl mb-2">🛒</p>
-                  <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>
+                  <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
                     Keranjang masih kosong
                   </p>
                 </div>
               ) : (
                 cart.map(item => (
-                  <div key={item.id} className="p-3 rounded-md" style={{ backgroundColor: '#FFFCF2' }}>
+                  <div key={item.id} className="p-3 rounded-md" style={{ backgroundColor: '#F5F5F5' }}>
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <p className="font-medium text-sm" style={{ color: '#3E3E3E' }}>
+                        <p className="font-medium text-sm" style={{ color: '#2C3E50' }}>
                           {item.name}
                         </p>
-                        <p className="text-xs opacity-70" style={{ color: '#3E3E3E' }}>
+                        <p className="text-xs opacity-70" style={{ color: '#2C3E50' }}>
                           Rp {item.price.toLocaleString()}
                         </p>
                       </div>
@@ -519,8 +519,8 @@ Terimakasih telah berbelanja!
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="w-8 h-8 rounded-md font-bold transition-colors duration-200"
                           style={{ 
-                            backgroundColor: '#E9C46A',
-                            color: '#3E3E3E'
+                            backgroundColor: '#2C3E50',
+                            color: '#FFFFFF'
                           }}
                         >
                           −
@@ -533,22 +533,22 @@ Terimakasih telah berbelanja!
                           onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
                           className="w-16 text-center border-2 rounded-md py-1"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            color: '#3E3E3E'
+                            borderColor: '#2C3E50',
+                            color: '#2C3E50'
                           }}
                         />
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="w-8 h-8 rounded-md font-bold transition-colors duration-200"
                           style={{ 
-                            backgroundColor: '#E9C46A',
-                            color: '#3E3E3E'
+                            backgroundColor: '#2C3E50',
+                            color: '#FFFFFF'
                           }}
                         >
                           +
                         </button>
                       </div>
-                      <p className="font-bold" style={{ color: '#3E3E3E' }}>
+                      <p className="font-bold" style={{ color: '#2C3E50' }}>
                         Rp {(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
@@ -560,16 +560,16 @@ Terimakasih telah berbelanja!
             {/* Cart Summary */}
             {cart.length > 0 && (
               <>
-                <div className="border-t pt-4 space-y-2" style={{ borderColor: '#E9C46A' }}>
+                <div className="border-t pt-4 space-y-2" style={{ borderColor: '#2C3E50' }}>
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: '#3E3E3E' }}>Subtotal:</span>
-                    <span style={{ color: '#3E3E3E' }}>Rp {subtotal.toLocaleString()}</span>
+                    <span style={{ color: '#2C3E50' }}>Subtotal:</span>
+                    <span style={{ color: '#2C3E50' }}>Rp {subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: '#3E3E3E' }}>Pajak (10%):</span>
-                    <span style={{ color: '#3E3E3E' }}>Rp {tax.toLocaleString()}</span>
+                    <span style={{ color: '#2C3E50' }}>Pajak (10%):</span>
+                    <span style={{ color: '#2C3E50' }}>Rp {tax.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold border-t pt-2" style={{ borderColor: '#E9C46A', color: '#3E3E3E' }}>
+                  <div className="flex justify-between text-xl font-bold border-t pt-2" style={{ borderColor: '#2C3E50', color: '#2C3E50' }}>
                     <span>TOTAL:</span>
                     <span>Rp {total.toLocaleString()}</span>
                   </div>
@@ -581,8 +581,8 @@ Terimakasih telah berbelanja!
                     onClick={() => setShowPaymentModal(true)}
                     className="w-full py-3 rounded-md font-bold text-lg transition-colors duration-200"
                     style={{ 
-                      backgroundColor: '#E9C46A',
-                      color: '#3E3E3E'
+                      backgroundColor: '#2C3E50',
+                      color: '#FFFFFF'
                     }}
                   >
                     💳 Bayar Sekarang
@@ -608,31 +608,31 @@ Terimakasih telah berbelanja!
       {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="max-w-lg w-full rounded-lg shadow-xl p-6" style={{ backgroundColor: '#F7E9A0' }}>
+          <div className="max-w-lg w-full rounded-lg shadow-xl p-6" style={{ backgroundColor: '#FFFFFF' }}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+              <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                 💳 Pembayaran
               </h2>
               <button
                 onClick={() => setShowPaymentModal(false)}
                 className="text-2xl hover:opacity-75"
-                style={{ color: '#3E3E3E' }}
+                style={{ color: '#2C3E50' }}
               >
                 ✕
               </button>
             </div>
 
             {/* Total */}
-            <div className="mb-6 p-4 rounded-md text-center" style={{ backgroundColor: '#FFFCF2' }}>
-              <p className="text-sm opacity-70 mb-1" style={{ color: '#3E3E3E' }}>Total Bayar</p>
-              <p className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>
+            <div className="mb-6 p-4 rounded-md text-center" style={{ backgroundColor: '#F5F5F5' }}>
+              <p className="text-sm opacity-70 mb-1" style={{ color: '#2C3E50' }}>Total Bayar</p>
+              <p className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
                 Rp {total.toLocaleString()}
               </p>
             </div>
 
             {/* Payment Method */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 Metode Pembayaran
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -642,9 +642,9 @@ Terimakasih telah berbelanja!
                     paymentMethod === 'cash' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
-                    backgroundColor: paymentMethod === 'cash' ? '#E9C46A' : '#FFFCF2',
-                    color: '#3E3E3E',
-                    ringColor: '#E9C46A'
+                    backgroundColor: paymentMethod === 'cash' ? '#2C3E50' : '#F5F5F5',
+                    color: '#FFFFFF',
+                    ringColor: '#2C3E50'
                   }}
                 >
                   💵 Cash
@@ -655,9 +655,9 @@ Terimakasih telah berbelanja!
                     paymentMethod === 'qris' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
-                    backgroundColor: paymentMethod === 'qris' ? '#E9C46A' : '#FFFCF2',
-                    color: '#3E3E3E',
-                    ringColor: '#E9C46A'
+                    backgroundColor: paymentMethod === 'qris' ? '#2C3E50' : '#F5F5F5',
+                    color: '#FFFFFF',
+                    ringColor: '#2C3E50'
                   }}
                 >
                   📱 QRIS
@@ -668,9 +668,9 @@ Terimakasih telah berbelanja!
                     paymentMethod === 'transfer' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
-                    backgroundColor: paymentMethod === 'transfer' ? '#E9C46A' : '#FFFCF2',
-                    color: '#3E3E3E',
-                    ringColor: '#E9C46A'
+                    backgroundColor: paymentMethod === 'transfer' ? '#2C3E50' : '#F5F5F5',
+                    color: '#FFFFFF',
+                    ringColor: '#2C3E50'
                   }}
                 >
                   🏦 Transfer
@@ -681,7 +681,7 @@ Terimakasih telah berbelanja!
             {/* Cash Payment Input */}
             {paymentMethod === 'cash' && (
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                   Jumlah Uang Diterima
                 </label>
                 <input
@@ -689,9 +689,9 @@ Terimakasih telah berbelanja!
                   placeholder="Masukkan jumlah uang..."
                   className="w-full px-4 py-3 text-lg border-2 rounded-md focus:outline-none"
                   style={{ 
-                    borderColor: '#E9C46A',
-                    backgroundColor: '#FFFCF2',
-                    color: '#3E3E3E'
+                    borderColor: '#2C3E50',
+                    backgroundColor: '#F5F5F5',
+                    color: '#2C3E50'
                   }}
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(e.target.value)}
@@ -706,9 +706,9 @@ Terimakasih telah berbelanja!
                       onClick={() => setAmountPaid(amount.toString())}
                       className="py-2 text-sm rounded-md transition-colors duration-200"
                       style={{ 
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E',
-                        border: '1px solid #E9C46A'
+                        backgroundColor: '#F5F5F5',
+                        color: '#2C3E50',
+                        border: '1px solid #2C3E50'
                       }}
                     >
                       {amount / 1000}k
@@ -738,8 +738,8 @@ Terimakasih telah berbelanja!
                 className="flex-1 py-3 rounded-md font-medium border-2 transition-colors duration-200"
                 style={{ 
                   backgroundColor: 'transparent',
-                  color: '#3E3E3E',
-                  borderColor: '#E9C46A'
+                  color: '#2C3E50',
+                  borderColor: '#2C3E50'
                 }}
               >
                 Batal

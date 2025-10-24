@@ -31,91 +31,18 @@ const UserManagement = () => {
     }
   });
 
-  // Mock data for development
-  const mockUsers = [
-    {
-      id: 1,
-      name: 'Siti Nurjana',
-      username: 'siti123',
-      email: 'siti@warung.com',
-      phone: '08123456789',
-      role: 'kasir',
-      status: 'active',
-      lastLogin: '2025-10-18 14:30',
-      createdAt: '2025-10-15',
-      totalTransactions: 145,
-      totalRevenue: 15500000,
-      avgTransaction: 35000,
-      permissions: {
-        processSales: true,
-        viewProducts: true,
-        applyDiscounts: true,
-        editPrices: false,
-        deleteTransactions: false,
-        viewReports: false,
-        manageUsers: false
-      }
-    },
-    {
-      id: 2,
-      name: 'Budi Santoso',
-      username: 'budi456',
-      email: 'budi@warung.com',
-      phone: '08234567890',
-      role: 'kasir',
-      status: 'blocked',
-      lastLogin: '2025-10-17 16:20',
-      createdAt: '2025-10-10',
-      totalTransactions: 89,
-      totalRevenue: 8900000,
-      avgTransaction: 28000,
-      permissions: {
-        processSales: true,
-        viewProducts: true,
-        applyDiscounts: false,
-        editPrices: false,
-        deleteTransactions: false,
-        viewReports: false,
-        manageUsers: false
-      }
-    },
-    {
-      id: 3,
-      name: 'Maya Sari',
-      username: 'maya789',
-      email: 'maya@warung.com',
-      phone: '08345678901',
-      role: 'supervisor',
-      status: 'active',
-      lastLogin: '2025-10-18 15:45',
-      createdAt: '2025-10-12',
-      totalTransactions: 67,
-      totalRevenue: 7200000,
-      avgTransaction: 42000,
-      permissions: {
-        processSales: true,
-        viewProducts: true,
-        applyDiscounts: true,
-        editPrices: true,
-        deleteTransactions: true,
-        viewReports: true,
-        manageUsers: false
-      }
-    }
-  ];
-
   // Fetch users data
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
+      const response = await api.get('/users');
+      console.log('Users data:', response.data);
+      const usersData = response.data.data || [];
+      setUsers(usersData);
+      setFilteredUsers(usersData);
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
+      alert('Failed to fetch users: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -128,9 +55,8 @@ const UserManagement = () => {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(user => 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -176,23 +102,22 @@ const UserManagement = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: API call to add user
-      const newUser = {
-        id: users.length + 1,
-        ...formData,
-        lastLogin: 'Never',
-        createdAt: new Date().toISOString().split('T')[0],
-        totalTransactions: 0,
-        totalRevenue: 0,
-        avgTransaction: 0
+      const userData = {
+        full_name: formData.name,
+        username: formData.username,
+        password: formData.password,
+        role: formData.role
       };
       
-      setUsers([...users, newUser]);
+      await api.post('/users', userData);
+      
       setShowAddModal(false);
       resetForm();
+      fetchUsers(); // Refresh list
       alert('User added successfully!');
     } catch (error) {
-      alert('Failed to add user: ' + error.message);
+      console.error('Add user error:', error);
+      alert('Failed to add user: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -202,18 +127,23 @@ const UserManagement = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: API call to update user
-      const updatedUsers = users.map(user => 
-        user.id === selectedUser.id ? { ...user, ...formData } : user
-      );
+      const userData = {
+        full_name: formData.name,
+        username: formData.username,
+        role: formData.role,
+        is_active: formData.status === 'active' ? 1 : 0
+      };
       
-      setUsers(updatedUsers);
+      await api.put(`/users/${selectedUser.id_user}`, userData);
+      
       setShowEditModal(false);
       setSelectedUser(null);
       resetForm();
+      fetchUsers(); // Refresh list
       alert('User updated successfully!');
     } catch (error) {
-      alert('Failed to update user: ' + error.message);
+      console.error('Update user error:', error);
+      alert('Failed to update user: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -221,57 +151,80 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
+      setLoading(true);
       try {
-        // TODO: API call to delete user
-        const updatedUsers = users.filter(user => user.id !== userId);
-        setUsers(updatedUsers);
+        await api.delete(`/users/${userId}`);
+        fetchUsers(); // Refresh list
         alert('User deleted successfully!');
       } catch (error) {
-        alert('Failed to delete user: ' + error.message);
+        console.error('Delete user error:', error);
+        alert('Failed to delete user: ' + (error.response?.data?.message || error.message));
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   const handleToggleStatus = async (userId, currentStatus) => {
+    setLoading(true);
     try {
-      // TODO: API call to toggle status
-      const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
-      const updatedUsers = users.map(user => 
-        user.id === userId ? { ...user, status: newStatus } : user
-      );
+      const newStatus = currentStatus === 1 || currentStatus === 'active' ? 0 : 1;
       
-      setUsers(updatedUsers);
-      alert(`User ${newStatus === 'active' ? 'activated' : 'blocked'} successfully!`);
+      // Get user data first
+      const user = users.find(u => u.id_user === userId);
+      if (!user) return;
+      
+      await api.put(`/users/${userId}`, {
+        full_name: user.full_name,
+        username: user.username,
+        role: user.role,
+        is_active: newStatus
+      });
+      
+      fetchUsers(); // Refresh list
+      alert(`User ${newStatus ? 'activated' : 'blocked'} successfully!`);
     } catch (error) {
-      alert('Failed to update user status: ' + error.message);
+      console.error('Toggle status error:', error);
+      alert('Failed to update status: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
     }
   };
 
   const openEditModal = (user) => {
     setSelectedUser(user);
     setFormData({
-      name: user.name,
+      name: user.full_name,
       username: user.username,
-      email: user.email,
-      phone: user.phone,
+      email: user.email || '',
+      phone: user.phone || '',
       password: '',
       role: user.role,
-      status: user.status,
-      permissions: user.permissions
+      status: user.is_active ? 'active' : 'blocked',
+      permissions: user.permissions || {
+        processSales: true,
+        viewProducts: true,
+        applyDiscounts: false,
+        editPrices: false,
+        deleteTransactions: false,
+        viewReports: false,
+        manageUsers: false
+      }
     });
     setShowEditModal(true);
   };
 
   const getStatusBadge = (status) => {
+    const isActive = status === 1 || status === 'active' || status === true;
     return (
       <span 
         className="px-2 py-1 rounded-full text-xs font-medium"
         style={{ 
-          backgroundColor: status === 'active' ? '#4CAF50' : '#FF5722',
+          backgroundColor: isActive ? '#4CAF50' : '#FF5722',
           color: 'white'
         }}
       >
-        {status === 'active' ? '✅ Active' : '❌ Blocked'}
+        {isActive ? '✓ Active' : '✖ Blocked'}
       </span>
     );
   };
@@ -297,8 +250,8 @@ const UserManagement = () => {
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#E9C46A' }}></div>
-            <p style={{ color: '#3E3E3E' }}>Loading users...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#2C3E50' }}></div>
+            <p style={{ color: '#2C3E50' }}>Loading users...</p>
           </div>
         </div>
       </AdminLayout>
@@ -311,8 +264,8 @@ const UserManagement = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>👥 User Management</h1>
-            <p className="opacity-70 mt-1" style={{ color: '#3E3E3E' }}>
+            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>👥 User Management</h1>
+            <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
               Manage kasir accounts and permissions
             </p>
           </div>
@@ -322,10 +275,10 @@ const UserManagement = () => {
               resetForm();
               setShowAddModal(true);
             }}
-            className="px-6 py-2 rounded-md font-medium transition-colors duration-200"
+            className="px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
             style={{ 
-              backgroundColor: '#E9C46A',
-              color: '#3E3E3E'
+              backgroundColor: '#2C3E50',
+              color: '#FFFFFF'
             }}
           >
             ➕ Add New User
@@ -333,11 +286,11 @@ const UserManagement = () => {
         </div>
 
         {/* Filters */}
-        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 🔍 Search Users
               </label>
               <input
@@ -345,9 +298,9 @@ const UserManagement = () => {
                 placeholder="Name, username, or email..."
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -356,15 +309,15 @@ const UserManagement = () => {
 
             {/* Role Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 👤 Role
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
@@ -378,15 +331,15 @@ const UserManagement = () => {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 📊 Status
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -399,126 +352,124 @@ const UserManagement = () => {
           </div>
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t" style={{ borderColor: '#E9C46A' }}>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t" style={{ borderColor: '#2C3E50' }}>
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+              <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                 {filteredUsers.length}
               </p>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Total Users</p>
+              <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Total Users</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+              <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                 {filteredUsers.filter(u => u.status === 'active').length}
               </p>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Active</p>
+              <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Active</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+              <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                 {filteredUsers.filter(u => u.role === 'kasir').length}
               </p>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Kasir</p>
+              <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Kasir</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+              <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                 {filteredUsers.filter(u => u.role === 'supervisor').length}
               </p>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Supervisors</p>
+              <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Supervisors</p>
             </div>
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead style={{ backgroundColor: '#E9C46A' }}>
+              <thead style={{ backgroundColor: '#2C3E50' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Performance
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Last Login
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#3E3E3E' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user, index) => (
-                  <tr key={user.id} className={index % 2 === 0 ? '' : 'bg-opacity-50'} style={{ backgroundColor: index % 2 === 0 ? 'transparent' : '#FFFCF2' }}>
+                  <tr key={user.id_user} className={index % 2 === 0 ? '' : 'bg-opacity-50'} style={{ backgroundColor: index % 2 === 0 ? 'transparent' : '#F8F9FA' }}>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                          style={{ backgroundColor: '#E9C46A' }}
+                          className="w-10 h-10 rounded-full flex items-center justify-center mr-3 font-bold shadow-md"
+                          style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
                         >
-                          <span className="font-bold" style={{ color: '#3E3E3E' }}>
-                            {user.name.charAt(0)}
-                          </span>
+                          {user.full_name?.charAt(0) || 'U'}
                         </div>
                         <div>
-                          <p className="font-medium" style={{ color: '#3E3E3E' }}>{user.name}</p>
-                          <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>@{user.username}</p>
+                          <p className="font-medium" style={{ color: '#2C3E50' }}>{user.full_name}</p>
+                          <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>@{user.username}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p style={{ color: '#3E3E3E' }}>{user.email}</p>
-                      <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>{user.phone}</p>
+                      <p style={{ color: '#2C3E50' }}>{user.email || '-'}</p>
+                      <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>{user.phone || '-'}</p>
                     </td>
                     <td className="px-6 py-4">
                       {getRoleBadge(user.role)}
                     </td>
                     <td className="px-6 py-4">
-                      {getStatusBadge(user.status)}
+                      {getStatusBadge(user.is_active)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm">
-                        <p style={{ color: '#3E3E3E' }}>{user.totalTransactions} transactions</p>
-                        <p className="opacity-70" style={{ color: '#3E3E3E' }}>Rp {user.totalRevenue.toLocaleString()}</p>
+                        <p style={{ color: '#2C3E50' }}>{user.totalTransactions || 0} transactions</p>
+                        <p className="opacity-70" style={{ color: '#2C3E50' }}>Rp {(user.totalRevenue || 0).toLocaleString()}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm" style={{ color: '#3E3E3E' }}>{user.lastLogin}</p>
+                      <p className="text-sm" style={{ color: '#2C3E50' }}>{user.lastLogin || 'Never'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
                         <button
                           onClick={() => openEditModal(user)}
-                          className="px-3 py-1 text-xs rounded-md transition-colors duration-200"
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
                           style={{ 
-                            backgroundColor: '#E9C46A',
-                            color: '#3E3E3E'
+                            backgroundColor: '#2C3E50',
+                            color: '#FFFFFF'
                           }}
                         >
                           ✏️ Edit
                         </button>
                         <button
-                          onClick={() => handleToggleStatus(user.id, user.status)}
-                          className="px-3 py-1 text-xs rounded-md transition-colors duration-200"
+                          onClick={() => handleToggleStatus(user.id_user, user.is_active)}
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
                           style={{ 
-                            backgroundColor: user.status === 'active' ? '#FF5722' : '#4CAF50',
+                            backgroundColor: user.is_active ? '#FF5722' : '#4CAF50',
                             color: 'white'
                           }}
                         >
-                          {user.status === 'active' ? '❌ Block' : '✅ Activate'}
+                          {user.is_active ? '❌ Block' : '✅ Activate'}
                         </button>
                         <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="px-3 py-1 text-xs rounded-md transition-colors duration-200"
+                          onClick={() => handleDeleteUser(user.id_user)}
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
                           style={{ 
                             backgroundColor: '#F44336',
                             color: 'white'
@@ -536,9 +487,9 @@ const UserManagement = () => {
 
           {filteredUsers.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-xl" style={{ color: '#3E3E3E' }}>👥</p>
-              <p style={{ color: '#3E3E3E' }}>No users found</p>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>
+              <p className="text-xl" style={{ color: '#2C3E50' }}>👥</p>
+              <p style={{ color: '#2C3E50' }}>No users found</p>
+              <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
                 Try adjusting your filters
               </p>
             </div>
@@ -548,17 +499,17 @@ const UserManagement = () => {
         {/* Add User Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#F7E9A0' }}>
+            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
               <form onSubmit={handleAddUser} className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+                  <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                     ➕ Add New User
                   </h2>
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
                     className="text-2xl hover:opacity-75"
-                    style={{ color: '#3E3E3E' }}
+                    style={{ color: '#2C3E50' }}
                   >
                     ✕
                   </button>
@@ -566,7 +517,7 @@ const UserManagement = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Full Name *
                     </label>
                     <input
@@ -574,9 +525,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -584,7 +535,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Username *
                     </label>
                     <input
@@ -592,9 +543,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.username}
                       onChange={(e) => setFormData({...formData, username: e.target.value})}
@@ -602,7 +553,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Email *
                     </label>
                     <input
@@ -610,9 +561,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -620,7 +571,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Phone Number *
                     </label>
                     <input
@@ -628,9 +579,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -638,7 +589,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Password *
                     </label>
                     <input
@@ -646,9 +597,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -656,16 +607,16 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Role *
                     </label>
                     <select
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.role}
                       onChange={(e) => setFormData({...formData, role: e.target.value})}
@@ -679,13 +630,13 @@ const UserManagement = () => {
 
                 {/* Permissions */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3" style={{ color: '#3E3E3E' }}>
+                  <h3 className="text-lg font-bold mb-3" style={{ color: '#2C3E50' }}>
                     🔐 Permissions
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {Object.entries(formData.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#FFFCF2' }}>
-                        <span className="text-sm" style={{ color: '#3E3E3E' }}>
+                      <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
+                        <span className="text-sm" style={{ color: '#2C3E50' }}>
                           {key === 'processSales' && '💰 Process Sales'}
                           {key === 'viewProducts' && '📦 View Products'}
                           {key === 'applyDiscounts' && '🏷️ Apply Discounts'}
@@ -721,8 +672,8 @@ const UserManagement = () => {
                     className="px-6 py-2 rounded-md font-medium border-2 transition-colors duration-200"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: '#3E3E3E',
-                      borderColor: '#E9C46A'
+                      color: '#2C3E50',
+                      borderColor: '#2C3E50'
                     }}
                   >
                     Cancel
@@ -732,8 +683,8 @@ const UserManagement = () => {
                     disabled={loading}
                     className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50"
                     style={{ 
-                      backgroundColor: '#E9C46A',
-                      color: '#3E3E3E'
+                      backgroundColor: '#2C3E50',
+                      color: '#2C3E50'
                     }}
                   >
                     {loading ? 'Adding...' : '➕ Add User'}
@@ -747,17 +698,17 @@ const UserManagement = () => {
         {/* Edit User Modal */}
         {showEditModal && selectedUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#F7E9A0' }}>
+            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
               <form onSubmit={handleEditUser} className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
-                    ✏️ Edit User - {selectedUser.name}
+                  <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
+                    ✏️ Edit User - {selectedUser.full_name}
                   </h2>
                   <button
                     type="button"
                     onClick={() => setShowEditModal(false)}
                     className="text-2xl hover:opacity-75"
-                    style={{ color: '#3E3E3E' }}
+                    style={{ color: '#2C3E50' }}
                   >
                     ✕
                   </button>
@@ -765,7 +716,7 @@ const UserManagement = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Full Name *
                     </label>
                     <input
@@ -773,9 +724,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -783,7 +734,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Username *
                     </label>
                     <input
@@ -791,9 +742,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.username}
                       onChange={(e) => setFormData({...formData, username: e.target.value})}
@@ -801,7 +752,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Email *
                     </label>
                     <input
@@ -809,9 +760,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -819,7 +770,7 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Phone Number *
                     </label>
                     <input
@@ -827,9 +778,9 @@ const UserManagement = () => {
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -837,16 +788,16 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       New Password (leave blank to keep current)
                     </label>
                     <input
                       type="password"
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -855,16 +806,16 @@ const UserManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                       Role *
                     </label>
                     <select
                       required
                       className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
                       style={{ 
-                        borderColor: '#E9C46A',
-                        backgroundColor: '#FFFCF2',
-                        color: '#3E3E3E'
+                        borderColor: '#2C3E50',
+                        backgroundColor: '#F8F9FA',
+                        color: '#2C3E50'
                       }}
                       value={formData.role}
                       onChange={(e) => setFormData({...formData, role: e.target.value})}
@@ -878,13 +829,13 @@ const UserManagement = () => {
 
                 {/* Permissions */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3" style={{ color: '#3E3E3E' }}>
+                  <h3 className="text-lg font-bold mb-3" style={{ color: '#2C3E50' }}>
                     🔐 Permissions
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {Object.entries(formData.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#FFFCF2' }}>
-                        <span className="text-sm" style={{ color: '#3E3E3E' }}>
+                      <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
+                        <span className="text-sm" style={{ color: '#2C3E50' }}>
                           {key === 'processSales' && '💰 Process Sales'}
                           {key === 'viewProducts' && '📦 View Products'}
                           {key === 'applyDiscounts' && '🏷️ Apply Discounts'}
@@ -920,8 +871,8 @@ const UserManagement = () => {
                     className="px-6 py-2 rounded-md font-medium border-2 transition-colors duration-200"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: '#3E3E3E',
-                      borderColor: '#E9C46A'
+                      color: '#2C3E50',
+                      borderColor: '#2C3E50'
                     }}
                   >
                     Cancel
@@ -931,8 +882,8 @@ const UserManagement = () => {
                     disabled={loading}
                     className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50"
                     style={{ 
-                      backgroundColor: '#E9C46A',
-                      color: '#3E3E3E'
+                      backgroundColor: '#2C3E50',
+                      color: '#2C3E50'
                     }}
                   >
                     {loading ? 'Updating...' : '💾 Update User'}

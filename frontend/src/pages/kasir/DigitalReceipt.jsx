@@ -25,7 +25,7 @@ const DigitalReceipt = ({ transaction, onClose, onDownload, onShare }) => {
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-lg font-bold" style={{ color: '#3E3E3E' }}>📄 Struk Digital</h2>
+          <h2 className="text-lg font-bold" style={{ color: '#2C3E50' }}>📄 Struk Digital</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-xl"
@@ -119,7 +119,7 @@ const DigitalReceipt = ({ transaction, onClose, onDownload, onShare }) => {
           <button
             onClick={onDownload}
             className="flex-1 py-2 px-4 rounded-lg font-medium"
-            style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+            style={{ backgroundColor: '#2C3E50', color: 'white' }}
           >
             💾 Download
           </button>

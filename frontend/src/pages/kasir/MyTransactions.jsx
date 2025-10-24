@@ -165,12 +165,12 @@ const MyTransactions = () => {
 
   return (
     <KasirLayout>
-      <div className="min-h-screen" style={{ backgroundColor: '#FFFCF2' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#F5F5F5' }}>
         <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>
+            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
               🧾 Transaksi Saya
             </h1>
             <p className="text-gray-600 mt-1">Riwayat transaksi yang telah selesai</p>
@@ -178,7 +178,7 @@ const MyTransactions = () => {
           <button
             onClick={() => navigate('/kasir/pos')}
             className="px-4 py-2 rounded-lg font-medium transition-colors"
-            style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+            style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
           >
             ➕ Transaksi Baru
           </button>
@@ -189,7 +189,7 @@ const MyTransactions = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 🔍 Cari Transaksi
               </label>
               <input
@@ -198,20 +198,20 @@ const MyTransactions = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-                style={{ borderColor: '#E9C46A', backgroundColor: '#FFFCF2' }}
+                style={{ borderColor: '#2C3E50', backgroundColor: '#F5F5F5' }}
               />
             </div>
 
             {/* Date Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 📅 Filter Periode
               </label>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-                style={{ borderColor: '#E9C46A', backgroundColor: '#FFFCF2' }}
+                style={{ borderColor: '#2C3E50', backgroundColor: '#F5F5F5' }}
               >
                 <option value="all">Semua Waktu</option>
                 <option value="today">Hari Ini</option>
@@ -222,10 +222,10 @@ const MyTransactions = () => {
 
             {/* Summary */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                 📊 Ringkasan
               </label>
-              <div className="text-sm" style={{ color: '#3E3E3E' }}>
+              <div className="text-sm" style={{ color: '#2C3E50' }}>
                 <div>Total Transaksi: <span className="font-bold">{filteredTransactions.length}</span></div>
                 <div>Total Pendapatan: <span className="font-bold text-green-600">
                   {formatCurrency(filteredTransactions.reduce((sum, t) => sum + (t.total || 0), 0))}
@@ -239,12 +239,12 @@ const MyTransactions = () => {
         {loading ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <div className="text-4xl mb-4">⏳</div>
-            <div className="text-lg font-medium" style={{ color: '#3E3E3E' }}>Loading transaksi...</div>
+            <div className="text-lg font-medium" style={{ color: '#2C3E50' }}>Loading transaksi...</div>
           </div>
         ) : filteredTransactions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <div className="text-6xl mb-4">📭</div>
-            <div className="text-xl font-medium mb-2" style={{ color: '#3E3E3E' }}>
+            <div className="text-xl font-medium mb-2" style={{ color: '#2C3E50' }}>
               {searchTerm || filter !== 'all' ? 'Tidak ada transaksi yang sesuai filter' : 'Belum ada transaksi'}
             </div>
             <p className="text-gray-600 mb-4">
@@ -256,7 +256,7 @@ const MyTransactions = () => {
             <button
               onClick={() => navigate('/kasir/pos')}
               className="px-6 py-2 rounded-lg font-medium"
-              style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+              style={{ backgroundColor: '#2C3E50', color: '#2C3E50' }}
             >
               🚀 Mulai Transaksi
             </button>
@@ -266,26 +266,26 @@ const MyTransactions = () => {
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
-                <thead style={{ backgroundColor: '#F7E9A0' }}>
+                <thead style={{ backgroundColor: '#FFFFFF' }}>
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#3E3E3E' }}>No. Transaksi</th>
-                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#3E3E3E' }}>Tanggal & Waktu</th>
-                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#3E3E3E' }}>Total</th>
-                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#3E3E3E' }}>Metode Bayar</th>
-                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#3E3E3E' }}>Status</th>
-                    <th className="px-4 py-3 text-center font-medium" style={{ color: '#3E3E3E' }}>Aksi</th>
+                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#2C3E50' }}>No. Transaksi</th>
+                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#2C3E50' }}>Tanggal & Waktu</th>
+                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#2C3E50' }}>Total</th>
+                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#2C3E50' }}>Metode Bayar</th>
+                    <th className="px-4 py-3 text-left font-medium" style={{ color: '#2C3E50' }}>Status</th>
+                    <th className="px-4 py-3 text-center font-medium" style={{ color: '#2C3E50' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTransactions.map((transaction, index) => (
                     <tr key={transaction.id || index} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">
-                        <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                        <div className="font-medium" style={{ color: '#2C3E50' }}>
                           {transaction.transaction_number || `TRX-${transaction.id || index + 1}`}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-sm" style={{ color: '#3E3E3E' }}>
+                        <div className="text-sm" style={{ color: '#2C3E50' }}>
                           {formatDateTime(transaction.created_at)}
                         </div>
                       </td>
@@ -311,7 +311,7 @@ const MyTransactions = () => {
                         <button
                           onClick={() => showTransactionDetail(transaction)}
                           className="px-3 py-1 text-xs rounded-md font-medium transition-colors"
-                          style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+                          style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
                         >
                           👁️ Detail
                         </button>
@@ -328,7 +328,7 @@ const MyTransactions = () => {
                 <div key={transaction.id || index} className="p-4 border-b">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                      <div className="font-medium" style={{ color: '#2C3E50' }}>
                         {transaction.transaction_number || `TRX-${transaction.id || index + 1}`}
                       </div>
                       <div className="text-sm text-gray-500">
@@ -351,7 +351,7 @@ const MyTransactions = () => {
                     <button
                       onClick={() => showTransactionDetail(transaction)}
                       className="px-3 py-1 text-xs rounded-md font-medium"
-                      style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+                      style={{ backgroundColor: '#2C3E50', color: '#2C3E50' }}
                     >
                       👁️ Detail
                     </button>
@@ -367,7 +367,7 @@ const MyTransactions = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="text-lg font-bold" style={{ color: '#3E3E3E' }}>📄 Detail Transaksi</h3>
+                <h3 className="text-lg font-bold" style={{ color: '#2C3E50' }}>📄 Detail Transaksi</h3>
                 <button
                   onClick={() => setShowDetailModal(false)}
                   className="text-gray-500 hover:text-gray-700 text-xl"
@@ -380,21 +380,21 @@ const MyTransactions = () => {
                 {detailLoading ? (
                   <div className="text-center py-8">
                     <div className="text-2xl mb-2">⏳</div>
-                    <p style={{ color: '#3E3E3E' }}>Memuat detail...</p>
+                    <p style={{ color: '#2C3E50' }}>Memuat detail...</p>
                   </div>
                 ) : (
                   <>
                     {/* Transaction Info */}
                     <div className="mb-4">
                       <div className="text-sm text-gray-600">Nomor Transaksi</div>
-                      <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                      <div className="font-medium" style={{ color: '#2C3E50' }}>
                         {selectedTransaction.transaction_code || `TRX-${selectedTransaction.id}`}
                       </div>
                     </div>
                     
                     <div className="mb-4">
                       <div className="text-sm text-gray-600">Tanggal & Waktu</div>
-                      <div className="font-medium" style={{ color: '#3E3E3E' }}>
+                      <div className="font-medium" style={{ color: '#2C3E50' }}>
                         {formatDateTimeWithSeconds(selectedTransaction.created_at)}
                       </div>
                     </div>

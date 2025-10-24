@@ -159,7 +159,7 @@ const Profile = () => {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#E76F51' }}></div>
-            <p style={{ color: '#3E3E3E' }}>Loading...</p>
+            <p style={{ color: '#2C3E50' }}>Loading...</p>
           </div>
         </div>
       </KasirLayout>
@@ -176,10 +176,10 @@ const Profile = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#3E3E3E' }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ color: '#2C3E50' }}>
               👤 Profil Saya
             </h1>
-            <p className="opacity-70" style={{ color: '#3E3E3E' }}>
+            <p className="opacity-70" style={{ color: '#2C3E50' }}>
               Kelola informasi profil dan keamanan akun Anda
             </p>
           </div>
@@ -207,7 +207,7 @@ const Profile = () => {
                     <div 
                       onClick={handlePhotoClick}
                       className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl cursor-pointer overflow-hidden transition-all hover:opacity-80 relative group"
-                      style={{ backgroundColor: '#E9C46A' }}
+                      style={{ backgroundColor: '#2C3E50' }}
                     >
                       {profilePhotoUrl ? (
                         <img 
@@ -251,10 +251,10 @@ const Profile = () => {
                     className="hidden"
                   />
 
-                  <h3 className="text-xl font-bold mb-1" style={{ color: '#3E3E3E' }}>
+                  <h3 className="text-xl font-bold mb-1" style={{ color: '#2C3E50' }}>
                     {user?.full_name}
                   </h3>
-                  <p className="text-sm opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                  <p className="text-sm opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     @{user?.username}
                   </p>
                   <span 
@@ -264,17 +264,17 @@ const Profile = () => {
                     🏷️ {user?.role === 'kasir' ? 'Kasir' : user?.role === 'admin' ? 'Admin' : 'User'}
                   </span>
 
-                  <div className="mt-6 pt-6 border-t" style={{ borderColor: '#E9C46A' }}>
+                  <div className="mt-6 pt-6 border-t" style={{ borderColor: '#2C3E50' }}>
                     <div className="text-left space-y-3">
                       <div>
-                        <p className="text-xs opacity-70" style={{ color: '#3E3E3E' }}>Status Akun</p>
-                        <p className="font-medium" style={{ color: '#3E3E3E' }}>
+                        <p className="text-xs opacity-70" style={{ color: '#2C3E50' }}>Status Akun</p>
+                        <p className="font-medium" style={{ color: '#2C3E50' }}>
                           {user?.is_active ? '✅ Aktif' : '❌ Tidak Aktif'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs opacity-70" style={{ color: '#3E3E3E' }}>Terdaftar Sejak</p>
-                        <p className="font-medium" style={{ color: '#3E3E3E' }}>
+                        <p className="text-xs opacity-70" style={{ color: '#2C3E50' }}>Terdaftar Sejak</p>
+                        <p className="font-medium" style={{ color: '#2C3E50' }}>
                           {new Date(user?.created_at).toLocaleDateString('id-ID', {
                             day: 'numeric',
                             month: 'long',
@@ -291,7 +291,7 @@ const Profile = () => {
             {/* Edit Form */}
             <div className="lg:col-span-2">
               <div className="rounded-2xl shadow-lg p-6" style={{ backgroundColor: 'white' }}>
-                <h2 className="text-xl font-bold mb-6" style={{ color: '#3E3E3E' }}>
+                <h2 className="text-xl font-bold mb-6" style={{ color: '#2C3E50' }}>
                   ✏️ Edit Profil
                 </h2>
 
@@ -304,7 +304,7 @@ const Profile = () => {
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                           Nama Lengkap
                         </label>
                         <input
@@ -314,15 +314,15 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            backgroundColor: '#FFFCF2'
+                            borderColor: '#2C3E50',
+                            backgroundColor: '#F5F5F5'
                           }}
                           required
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                           Username
                         </label>
                         <input
@@ -332,8 +332,8 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            backgroundColor: '#FFFCF2'
+                            borderColor: '#2C3E50',
+                            backgroundColor: '#F5F5F5'
                           }}
                           required
                         />
@@ -342,14 +342,14 @@ const Profile = () => {
                   </div>
 
                   {/* Ubah Password */}
-                  <div className="pt-6 border-t" style={{ borderColor: '#E9C46A' }}>
+                  <div className="pt-6 border-t" style={{ borderColor: '#2C3E50' }}>
                     <h3 className="font-semibold mb-4 text-sm" style={{ color: '#E76F51' }}>
                       UBAH PASSWORD (Opsional)
                     </h3>
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                           Password Saat Ini
                         </label>
                         <input
@@ -359,15 +359,15 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            backgroundColor: '#FFFCF2'
+                            borderColor: '#2C3E50',
+                            backgroundColor: '#F5F5F5'
                           }}
                           placeholder="Kosongkan jika tidak ingin mengubah"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                           Password Baru
                         </label>
                         <input
@@ -377,15 +377,15 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            backgroundColor: '#FFFCF2'
+                            borderColor: '#2C3E50',
+                            backgroundColor: '#F5F5F5'
                           }}
                           placeholder="Minimal 6 karakter"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#3E3E3E' }}>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
                           Konfirmasi Password Baru
                         </label>
                         <input
@@ -395,8 +395,8 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                           style={{ 
-                            borderColor: '#E9C46A',
-                            backgroundColor: '#FFFCF2'
+                            borderColor: '#2C3E50',
+                            backgroundColor: '#F5F5F5'
                           }}
                           placeholder="Ketik ulang password baru"
                         />
@@ -423,8 +423,8 @@ const Profile = () => {
                       onClick={() => navigate('/kasir/dashboard')}
                       className="px-6 py-3 rounded-lg font-semibold transition-all hover:opacity-90"
                       style={{ 
-                        backgroundColor: '#E9C46A',
-                        color: '#3E3E3E'
+                        backgroundColor: '#2C3E50',
+                        color: '#FFFFFF'
                       }}
                     >
                       ❌ Batal

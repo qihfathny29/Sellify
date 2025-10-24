@@ -10,6 +10,18 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [error, setError] = useState('');
 
+  // Generate barcode dari product data
+  const generateBarcodeNumber = (product) => {
+    if (product.barcode) {
+      return product.barcode;
+    }
+    
+    // Generate barcode dari ID (tambah prefix + padding)
+    // Format: 8999 + ID (6 digit)
+    const productId = String(product.id).padStart(6, '0');
+    return `8999${productId}`;
+  };
+
   // Fetch single product
   const fetchProduct = async () => {
     setLoading(true);
@@ -34,35 +46,7 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  // Generate Barcode SVG
-  const generateBarcode = (text) => {
-    const barcodeText = text || '12345654';
-    const bars = barcodeText.split('').map((digit, index) => {
-      const width = (parseInt(digit) % 3) + 1;
-      return (
-        <rect
-          key={index}
-          x={index * 12}
-          y="0"
-          width={width}
-          height="60"
-          fill="#000"
-        />
-      );
-    });
-
-    return (
-      <div className="bg-white p-6 rounded-lg border-2 border-gray-300 text-center">
-        <svg width="300" height="80" className="mx-auto">
-          <g>{bars}</g>
-          <text x="150" y="75" textAnchor="middle" fontSize="14" fill="#000">
-            {barcodeText}
-          </text>
-        </svg>
-      </div>
-    );
-  };
-
+  // Format Price
   const formatPrice = (price) => {
     return parseFloat(price || 0).toLocaleString('id-ID');
   };
@@ -72,8 +56,8 @@ const ProductDetail = () => {
       <KasirLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#E9C46A' }}></div>
-            <p style={{ color: '#3E3E3E' }}>Loading product details...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#2C3E50' }}></div>
+            <p style={{ color: '#2C3E50' }}>Loading product details...</p>
           </div>
         </div>
       </KasirLayout>
@@ -84,20 +68,20 @@ const ProductDetail = () => {
     return (
       <KasirLayout>
         <div className="text-center py-12">
-          <div className="rounded-lg p-8" style={{ backgroundColor: '#F7E9A0' }}>
+          <div className="rounded-lg p-8" style={{ backgroundColor: '#FFFFFF' }}>
             <p className="text-6xl mb-4">❌</p>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: '#2C3E50' }}>
               Product Not Found
             </h2>
-            <p className="mb-6 opacity-70" style={{ color: '#3E3E3E' }}>
+            <p className="mb-6 opacity-70" style={{ color: '#2C3E50' }}>
               {error || 'The product you are looking for does not exist.'}
             </p>
             <button
               onClick={() => navigate('/kasir/products')}
               className="px-6 py-3 rounded-md font-medium transition-colors duration-200"
               style={{ 
-                backgroundColor: '#E9C46A',
-                color: '#3E3E3E'
+                backgroundColor: '#2C3E50',
+                color: '#2C3E50'
               }}
             >
               ← Back to Products
@@ -108,30 +92,33 @@ const ProductDetail = () => {
     );
   }
 
+  // Generate barcode number
+  const barcodeNumber = generateBarcodeNumber(product);
+
   return (
     <KasirLayout>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header with Back Button */}
-        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/kasir/products')}
                 className="px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center space-x-2 hover:opacity-80"
                 style={{ 
-                  backgroundColor: '#E9C46A',
-                  color: '#3E3E3E'
+                  backgroundColor: '#2C3E50',
+                  color: '#FFFFFF'
                 }}
               >
                 <span>←</span>
                 <span>Back</span>
               </button>
               <div>
-                <h1 className="text-3xl font-bold flex items-center space-x-2" style={{ color: '#3E3E3E' }}>
+                <h1 className="text-3xl font-bold flex items-center space-x-2" style={{ color: '#2C3E50' }}>
                   <span>📦</span>
                   <span>Product Details</span>
                 </h1>
-                <p className="opacity-70 mt-1" style={{ color: '#3E3E3E' }}>
+                <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
                   Complete information about this product
                 </p>
               </div>
@@ -153,8 +140,8 @@ const ProductDetail = () => {
           {/* Left Column - Image & Barcode */}
           <div className="lg:col-span-1 space-y-6">
             {/* Product Image */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                 Product Image
               </h3>
               <div className="text-center">
@@ -178,7 +165,7 @@ const ProductDetail = () => {
                     <div 
                       className="fallback-icon w-full flex items-center justify-center rounded-lg shadow-lg"
                       style={{ 
-                        backgroundColor: '#FFFCF2',
+                        backgroundColor: '#F5F5F5',
                         minHeight: '250px',
                         display: 'none'
                       }}
@@ -190,7 +177,7 @@ const ProductDetail = () => {
                   <div 
                     className="w-full flex items-center justify-center rounded-lg shadow-lg"
                     style={{ 
-                      backgroundColor: '#FFFCF2',
+                      backgroundColor: '#F5F5F5',
                       minHeight: '250px'
                     }}
                   >
@@ -200,11 +187,11 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Barcode Section */}
+            {/* Barcode Section - PERBAIKAN */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">📊</span>
-                <h3 className="text-lg font-semibold" style={{ color: '#3E3E3E' }}>Barcode</h3>
+                <h3 className="text-lg font-semibold" style={{ color: '#2C3E50' }}>Barcode</h3>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6 text-center">
@@ -212,36 +199,43 @@ const ProductDetail = () => {
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-white p-4 rounded border-2 border-dashed border-gray-300">
                     <div className="flex justify-center items-center gap-1 mb-2">
-                      {/* Barcode lines */}
-                      {[...Array(15)].map((_, i) => (
+                      {/* Generate barcode lines dari barcode number */}
+                      {barcodeNumber.split('').map((digit, i) => (
                         <div 
                           key={i}
                           className="bg-black"
                           style={{ 
-                            width: Math.random() > 0.5 ? '2px' : '4px',
-                            height: '40px'
+                            width: parseInt(digit) % 2 === 0 ? '3px' : '2px',
+                            height: '50px'
                           }}
                         />
                       ))}
                     </div>
                     
-                    {/* Barcode number - PERBAIKAN DI SINI */}
-                    <div className="text-center text-sm font-mono mt-2" style={{ color: '#3E3E3E' }}>
-                      {product.barcode || 'No barcode'}
+                    {/* Barcode number */}
+                    <div className="text-center text-sm font-mono font-bold mt-2" style={{ color: '#2C3E50' }}>
+                      {barcodeNumber}
                     </div>
                   </div>
                 </div>
                 
+                {/* Info jika generated */}
+                {!product.barcode && (
+                  <p className="text-xs text-gray-500 mb-3 italic">
+                    * Auto-generated barcode
+                  </p>
+                )}
+                
                 {/* Copy barcode button */}
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(product.barcode || '');
-                    alert('Barcode copied to clipboard!');
+                    navigator.clipboard.writeText(barcodeNumber);
+                    alert('✅ Barcode copied to clipboard: ' + barcodeNumber);
                   }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-80"
                   style={{ 
-                    backgroundColor: '#E9C46A',
-                    color: '#3E3E3E'
+                    backgroundColor: '#2C3E50',
+                    color: '#FFFFFF'
                   }}
                 >
                   📋 Copy Barcode
@@ -253,25 +247,25 @@ const ProductDetail = () => {
           {/* Right Column - Product Information */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                 Basic Information
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium opacity-70 mb-1" style={{ color: '#3E3E3E' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-1" style={{ color: '#2C3E50' }}>
                     Product Name
                   </label>
-                  <h2 className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>
+                  <h2 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
                     {product.name}
                   </h2>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium opacity-70 mb-1" style={{ color: '#3E3E3E' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-1" style={{ color: '#2C3E50' }}>
                     Category
                   </label>
-                  <p className="text-xl font-medium" style={{ color: '#3E3E3E' }}>
+                  <p className="text-xl font-medium" style={{ color: '#2C3E50' }}>
                     {product.category_name || 'Kebutuhan Harian'}
                   </p>
                 </div>
@@ -279,29 +273,29 @@ const ProductDetail = () => {
             </div>
 
             {/* Pricing Information */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                 💰 Pricing Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     Selling Price
                   </label>
-                  <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+                  <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                     Rp {formatPrice(product.price)}
                   </p>
                 </div>
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     Cost Price
                   </label>
-                  <p className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+                  <p className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
                     Rp {formatPrice(product.cost)}
                   </p>
                 </div>
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     Profit
                   </label>
                   <p className="text-xl font-bold text-green-600">
@@ -315,13 +309,13 @@ const ProductDetail = () => {
             </div>
 
             {/* Stock Information */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                 📦 Stock Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     Current Stock
                   </label>
                   <p className={`text-3xl font-bold ${product.stock <= 10 ? 'text-red-600' : 'text-green-600'}`}>
@@ -331,11 +325,11 @@ const ProductDetail = () => {
                     <p className="text-sm text-red-600 mt-1 font-medium">⚠️ Low Stock Alert!</p>
                   )}
                 </div>
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                  <label className="block text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>
                     Min Stock Alert
                   </label>
-                  <p className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>
+                  <p className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
                     {product.min_stock || 1} units
                   </p>
                 </div>
@@ -343,12 +337,12 @@ const ProductDetail = () => {
             </div>
 
             {/* Description Section */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                 📝 Description
               </h3>
-              <div className="p-4 rounded-lg" style={{ backgroundColor: '#FFFCF2' }}>
-                <p className="text-lg leading-relaxed" style={{ color: '#3E3E3E' }}>
+              <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
+                <p className="text-lg leading-relaxed" style={{ color: '#2C3E50' }}>
                   {product.description || 'No description available for this product.'}
                 </p>
               </div>

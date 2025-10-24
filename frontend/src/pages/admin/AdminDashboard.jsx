@@ -54,21 +54,21 @@ const AdminDashboard = () => {
 
   const StatsCard = ({ title, value, subtitle, icon, isAlert = false }) => (
     <div 
-      className="rounded-lg shadow-lg p-6 transition-all duration-200 transform hover:scale-105"
+      className="rounded-xl shadow-lg p-6 transition-all duration-200 transform hover:scale-105"
       style={{ 
-        backgroundColor: isAlert ? '#FFD56B' : '#F7E9A0',
-        border: isAlert ? '2px solid #FF6B6B' : '2px solid #E9C46A'
+        backgroundColor: isAlert ? '#E74C3C' : '#FFFFFF',
+        border: isAlert ? '2px solid #C0392B' : '2px solid #ECF0F1'
       }}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>
+          <p className="text-sm font-medium" style={{ color: isAlert ? '#FFFFFF' : '#7F8C8D' }}>
             {title}
           </p>
-          <p className="text-2xl font-bold mt-2" style={{ color: '#3E3E3E' }}>
+          <p className="text-2xl font-bold mt-2" style={{ color: isAlert ? '#FFFFFF' : '#2C3E50' }}>
             {value}
           </p>
-          <p className="text-xs opacity-60 mt-1" style={{ color: '#3E3E3E' }}>
+          <p className="text-xs mt-1" style={{ color: isAlert ? 'rgba(255,255,255,0.8)' : '#95A5A6' }}>
             {subtitle}
           </p>
         </div>
@@ -84,8 +84,8 @@ const AdminDashboard = () => {
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#E9C46A' }}></div>
-            <p className="mt-4" style={{ color: '#3E3E3E' }}>Loading dashboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#2C3E50' }}></div>
+            <p className="mt-4" style={{ color: '#2C3E50' }}>Loading dashboard...</p>
           </div>
         </div>
       </AdminLayout>
@@ -96,7 +96,7 @@ const AdminDashboard = () => {
     <AdminLayout>
       {/* Dashboard Stats Cards */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+        <h2 className="text-2xl font-bold mb-6" style={{ color: '#2C3E50' }}>
           Overview
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -130,52 +130,52 @@ const AdminDashboard = () => {
 
       {/* Quick Actions */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+        <h2 className="text-2xl font-bold mb-6" style={{ color: '#2C3E50' }}>
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => navigate('/admin/products')}
-            className="p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
             style={{ 
-              backgroundColor: '#F7E9A0',
-              borderColor: '#E9C46A'
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #ECF0F1'
             }}
           >
             <div className="text-center">
-              <div className="text-2xl mb-2">📦</div>
-              <h3 className="font-bold" style={{ color: '#3E3E3E' }}>Manage Products</h3>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Add, edit, delete products</p>
+              <div className="text-3xl mb-3">📦</div>
+              <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>Manage Products</h3>
+              <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Add, edit, delete products</p>
             </div>
           </button>
 
           <button
             onClick={() => navigate('/admin/reports')}
-            className="p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
             style={{ 
-              backgroundColor: '#F7E9A0',
-              borderColor: '#E9C46A'
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #ECF0F1'
             }}
           >
             <div className="text-center">
-              <div className="text-2xl mb-2">📊</div>
-              <h3 className="font-bold" style={{ color: '#3E3E3E' }}>View Reports</h3>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Sales analytics & insights</p>
+              <div className="text-3xl mb-3">📊</div>
+              <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>View Reports</h3>
+              <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Sales analytics & insights</p>
             </div>
           </button>
 
           <button
             onClick={() => navigate('/admin/users')}
-            className="p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
             style={{ 
-              backgroundColor: '#F7E9A0',
-              borderColor: '#E9C46A'
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #ECF0F1'
             }}
           >
             <div className="text-center">
-              <div className="text-2xl mb-2">👥</div>
-              <h3 className="font-bold" style={{ color: '#3E3E3E' }}>User Management</h3>
-              <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>Manage kasir accounts</p>
+              <div className="text-3xl mb-3">👥</div>
+              <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>User Management</h3>
+              <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Manage kasir accounts</p>
             </div>
           </button>
         </div>
@@ -183,59 +183,59 @@ const AdminDashboard = () => {
 
       {/* Recent Products */}
       <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold" style={{ color: '#3E3E3E' }}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
             Recent Products
           </h2>
           <button
             onClick={() => navigate('/admin/products')}
-            className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+            className="px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
             style={{ 
-              backgroundColor: '#E9C46A',
-              color: '#3E3E3E'
+              backgroundColor: '#2C3E50',
+              color: '#FFFFFF'
             }}
           >
             View All Products →
           </button>
         </div>
 
-        <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-xl shadow-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
           <table className="w-full">
-            <thead style={{ backgroundColor: '#E9C46A' }}>
+            <thead style={{ backgroundColor: '#2C3E50' }}>
               <tr>
-                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#3E3E3E' }}>Product</th>
-                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#3E3E3E' }}>Category</th>
-                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#3E3E3E' }}>Price</th>
-                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#3E3E3E' }}>Stock</th>
-                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#3E3E3E' }}>Status</th>
+                <th className="text-left py-4 px-6 font-semibold" style={{ color: '#FFFFFF' }}>Product</th>
+                <th className="text-left py-4 px-6 font-semibold" style={{ color: '#FFFFFF' }}>Category</th>
+                <th className="text-left py-4 px-6 font-semibold" style={{ color: '#FFFFFF' }}>Price</th>
+                <th className="text-left py-4 px-6 font-semibold" style={{ color: '#FFFFFF' }}>Stock</th>
+                <th className="text-left py-4 px-6 font-semibold" style={{ color: '#FFFFFF' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {recentProducts.map((product, index) => (
-                <tr key={product.id} className={index % 2 === 0 ? '' : 'bg-black bg-opacity-5'}>
-                  <td className="py-3 px-4">
-                    <p className="font-medium" style={{ color: '#3E3E3E' }}>{product.name}</p>
+                <tr key={product.id} style={{ backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F8F9FA' }}>
+                  <td className="py-4 px-6">
+                    <p className="font-medium" style={{ color: '#2C3E50' }}>{product.name}</p>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm" style={{ color: '#3E3E3E' }}>
+                  <td className="py-4 px-6">
+                    <span className="text-sm" style={{ color: '#7F8C8D' }}>
                       {product.category_name || 'N/A'}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="font-medium" style={{ color: '#3E3E3E' }}>
+                  <td className="py-4 px-6">
+                    <span className="font-medium" style={{ color: '#2C3E50' }}>
                       Rp {product.price?.toLocaleString()}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="font-medium" style={{ color: '#3E3E3E' }}>
+                  <td className="py-4 px-6">
+                    <span className="font-medium" style={{ color: '#2C3E50' }}>
                       {product.stock}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-4 px-6">
                     <span 
-                      className="px-2 py-1 rounded-full text-xs font-medium"
+                      className="px-3 py-1 rounded-full text-xs font-medium"
                       style={{
-                        backgroundColor: product.stock > product.min_stock ? '#4CAF50' : '#FF9800',
+                        backgroundColor: product.stock > product.min_stock ? '#27AE60' : '#E67E22',
                         color: '#FFFFFF'
                       }}
                     >

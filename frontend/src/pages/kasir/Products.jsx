@@ -95,8 +95,8 @@ const Products = () => {
       <KasirLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#E9C46A' }}></div>
-            <p style={{ color: '#3E3E3E' }}>Loading products...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#2C3E50' }}></div>
+            <p style={{ color: '#2C3E50' }}>Loading products...</p>
           </div>
         </div>
       </KasirLayout>
@@ -109,8 +109,8 @@ const Products = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#3E3E3E' }}>📦 Product Catalog</h1>
-            <p className="opacity-70 mt-1" style={{ color: '#3E3E3E' }}>
+            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>📦 Product Catalog</h1>
+            <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
               Browse available products and check details
             </p>
           </div>
@@ -118,8 +118,8 @@ const Products = () => {
             onClick={fetchProducts}
             className="px-4 py-2 rounded-md font-medium transition-colors duration-200"
             style={{ 
-              backgroundColor: '#E9C46A',
-              color: '#3E3E3E'
+              backgroundColor: '#2C3E50',
+              color: '#FFFFFF'
             }}
           >
             🔄 Refresh
@@ -134,16 +134,16 @@ const Products = () => {
         )}
 
         {/* Search & Filter */}
-        <div className="rounded-lg shadow-lg p-4" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-lg p-4" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="🔍 Search products..."
               className="w-full px-4 py-2 border-2 rounded-md focus:outline-none"
               style={{ 
-                borderColor: '#E9C46A',
-                backgroundColor: '#FFFCF2',
-                color: '#3E3E3E'
+                borderColor: '#2C3E50',
+                backgroundColor: '#F5F5F5',
+                color: '#2C3E50'
               }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -152,9 +152,9 @@ const Products = () => {
             <select
               className="w-full px-4 py-2 border-2 rounded-md focus:outline-none"
               style={{ 
-                borderColor: '#E9C46A',
-                backgroundColor: '#FFFCF2',
-                color: '#3E3E3E'
+                borderColor: '#2C3E50',
+                backgroundColor: '#F5F5F5',
+                color: '#2C3E50'
               }}
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -174,7 +174,7 @@ const Products = () => {
             <div
               key={product.id}
               className="rounded-lg shadow-lg p-6 transition-transform duration-200 hover:scale-105 cursor-pointer"
-              style={{ backgroundColor: '#F7E9A0' }}
+              style={{ backgroundColor: '#FFFFFF' }}
               onClick={() => navigate(`/kasir/products/${product.id}`)}
             >
               {/* SIMPLIFIED IMAGE - NO CONDITIONS */}
@@ -193,12 +193,12 @@ const Products = () => {
               </div>
 
               {/* Product Name */}
-              <h3 className="font-bold text-lg mb-3 text-center" style={{ color: '#3E3E3E' }}>
+              <h3 className="font-bold text-lg mb-3 text-center" style={{ color: '#2C3E50' }}>
                 {product.name}
               </h3>
               
               {/* Description */}
-              <p className="text-sm opacity-70 mb-4 text-center" style={{ color: '#3E3E3E' }}>
+              <p className="text-sm opacity-70 mb-4 text-center" style={{ color: '#2C3E50' }}>
                 {product.description || 'No description available'}
               </p>
 
@@ -206,8 +206,8 @@ const Products = () => {
               <button
                 className="w-full py-2 rounded-md font-medium transition-colors duration-200 flex items-center justify-center"
                 style={{ 
-                  backgroundColor: '#E9C46A',
-                  color: '#3E3E3E'
+                  backgroundColor: '#2C3E50',
+                  color: '#FFFFFF'
                 }}
               >
                 👁️ Lihat Detail
@@ -218,12 +218,12 @@ const Products = () => {
 
         {/* No Products Found */}
         {filteredProducts.length === 0 && !loading && (
-          <div className="text-center py-12 rounded-lg" style={{ backgroundColor: '#F7E9A0' }}>
+          <div className="text-center py-12 rounded-lg" style={{ backgroundColor: '#FFFFFF' }}>
             <p className="text-6xl mb-4">📭</p>
-            <p className="text-xl font-medium mb-2" style={{ color: '#3E3E3E' }}>
+            <p className="text-xl font-medium mb-2" style={{ color: '#2C3E50' }}>
               {products.length === 0 ? 'No products available' : 'No products found'}
             </p>
-            <p className="opacity-70" style={{ color: '#3E3E3E' }}>
+            <p className="opacity-70" style={{ color: '#2C3E50' }}>
               {products.length === 0 
                 ? 'Ask admin to add products first' 
                 : 'Try adjusting your search or filter'
@@ -235,7 +235,7 @@ const Products = () => {
         {/* Barcode Section (for reference, not used in modal anymore) */}
         {/* {showDetailModal && selectedProduct && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#F7E9A0' }}>
+            <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
               <div className="p-6">
                 {generateBarcode(selectedProduct.barcode)}
               </div>

@@ -1,0 +1,1039 @@
+import React, { useState } from 'react';import React, { useState } from 'react';import React, { useState } from 'react';import React, { useState } from 'react';
+
+import { Link, useLocation } from 'react-router-dom';
+
+import logoSellify from '../../assets/images/logo-sellify.png';import { Link, useLocation } from 'react-router-dom';
+
+
+
+const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {import logoSellify from '../../assets/images/logo-sellify.png';import { Link, useLocation } from 'react-router-dom';import { Link, useLocation } from 'react-router-dom';
+
+  const location = useLocation();
+
+  const [expandedItems, setExpandedItems] = useState({});
+
+
+
+  const menuItems = [const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {import logoSellify from '../../assets/images/logo-sellify.png';import logoSellify from '../../assets/images/logo-sellify.png';
+
+    {
+
+      id: 'dashboard',  const location = useLocation();
+
+      label: 'Dashboard',
+
+      icon: '📊',  const [expandedItems, setExpandedItems] = useState({});
+
+      path: '/admin',
+
+      subItems: []
+
+    },
+
+    {  const menuItems = [const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
+
+      id: 'products',
+
+      label: 'Products',    {
+
+      icon: '📦',
+
+      path: '/admin/products',      id: 'dashboard',  const location = useLocation();  const location = useLocation();
+
+      subItems: [
+
+        { label: 'All Products', path: '/admin/products' },      label: 'Dashboard',
+
+        { label: 'Add Product', path: '/admin/products?add=true' },
+
+        { label: 'Categories', path: '/admin/categories' }      icon: '📊',  const [expandedItems, setExpandedItems] = useState({});  const [expandedItems, setExpandedItems] = useState({});
+
+      ]
+
+    },      path: '/admin',
+
+    {
+
+      id: 'transactions',      subItems: []
+
+      label: 'Transactions',
+
+      icon: '💰',    },
+
+      path: '/admin/transactions',
+
+      subItems: [    {  const menuItems = [  const menuItems = [
+
+        { label: "Today's Sales", path: '/admin/transactions/today' },
+
+        { label: 'Transaction History', path: '/admin/transactions/history' }      id: 'products',
+
+      ]
+
+    },      label: 'Products',    {    {
+
+    {
+
+      id: 'reports',      icon: '📦',
+
+      label: 'Reports',
+
+      icon: '📈',      path: '/admin/products',      id: 'dashboard',      id: 'dashboard',
+
+      path: '/admin/reports',
+
+      subItems: [      subItems: [
+
+        { label: 'Sales Report', path: '/admin/reports/sales' },
+
+        { label: 'Stock Report', path: '/admin/reports/stock' },        { label: 'All Products', path: '/admin/products' },      label: 'Dashboard',      label: 'Dashboard',
+
+        { label: 'Profit Analysis', path: '/admin/reports/profit' }
+
+      ]        { label: 'Add Product', path: '/admin/products?add=true' },
+
+    },
+
+    {        { label: 'Categories', path: '/admin/categories' }      icon: '📊',      icon: '📊',
+
+      id: 'users',
+
+      label: 'User Management',      ]
+
+      icon: '👥',
+
+      path: '/admin/users',    },      path: '/admin',      path: '/admin',
+
+      subItems: [
+
+        { label: 'Kasir Accounts', path: '/admin/users' },    {
+
+        { label: 'Activity Log', path: '/admin/users/activity' }
+
+      ]      id: 'transactions',      subItems: []      subItems: []
+
+    },
+
+    {      label: 'Transactions',
+
+      id: 'settings',
+
+      label: 'Settings',      icon: '💰',    },    },
+
+      icon: '⚙️',
+
+      path: '/admin/settings',      path: '/admin/transactions',
+
+      subItems: [
+
+        { label: 'Store Info', path: '/admin/settings/store' },      subItems: [    {    {
+
+        { label: 'Payment Methods', path: '/admin/settings/payment' },
+
+        { label: 'Notifications', path: '/admin/settings/notifications' }        { label: "Today's Sales", path: '/admin/transactions/today' },
+
+      ]
+
+    }        { label: 'Transaction History', path: '/admin/transactions/history' }      id: 'products',      id: 'products',
+
+  ];
+
+      ]
+
+  const toggleExpanded = (itemId) => {
+
+    setExpandedItems(prev => ({    },      label: 'Products',      label: 'Products',
+
+      ...prev,
+
+      [itemId]: !prev[itemId]    {
+
+    }));
+
+  };      id: 'reports',      icon: '📦',      icon: '📦',
+
+
+
+  const isActive = (path) => {      label: 'Reports',
+
+    if (path === '/admin') {
+
+      return location.pathname === '/admin';      icon: '📈',      path: '/admin/products',      path: '/admin/products',
+
+    }
+
+    return location.pathname.startsWith(path);      path: '/admin/reports',
+
+  };
+
+      subItems: [      subItems: [      subItems: [
+
+  const isParentActive = (item) => {
+
+    if (isActive(item.path)) return true;        { label: 'Sales Report', path: '/admin/reports/sales' },
+
+    return item.subItems.some(subItem => isActive(subItem.path));
+
+  };        { label: 'Stock Report', path: '/admin/reports/stock' },        { label: 'All Products', path: '/admin/products' },        { label: 'All Products', path: '/admin/products' },
+
+
+
+  return (        { label: 'Profit Analysis', path: '/admin/reports/profit' }
+
+    <div 
+
+      className={`fixed left-0 top-0 h-full transition-all duration-300 z-40 shadow-xl ${      ]        { label: 'Add Product', path: '/admin/products?add=true' },        { label: 'Add Product', path: '/admin/products?add=true' },
+
+        isCollapsed ? 'w-16' : 'w-64'
+
+      }`}    },
+
+      style={{ backgroundColor: '#FFFFFF', borderRight: '2px solid #E0E0E0' }}
+
+    >    {        { label: 'Categories', path: '/admin/categories' }        { label: 'Categories', path: '/admin/categories' }
+
+      <div className="p-6 border-b" style={{ borderColor: '#E0E0E0' }}>
+
+        <div className="flex items-center justify-between">      id: 'users',
+
+          <div className={`flex ${isCollapsed ? 'justify-center w-full' : 'justify-center flex-1'}`}>
+
+            <img       label: 'User Management',      ]      ]
+
+              src={logoSellify} 
+
+              alt="Sellify Logo"       icon: '👥',
+
+              className={isCollapsed ? "w-10 h-10 object-contain" : "w-20 h-20 object-contain"}
+
+            />      path: '/admin/users',    },    },
+
+          </div>
+
+                subItems: [
+
+          {!isCollapsed && (
+
+            <button        { label: 'Kasir Accounts', path: '/admin/users' },    {    {
+
+              onClick={() => setIsCollapsed(!isCollapsed)}
+
+              className="p-2 rounded-lg transition-all duration-200 ml-2"        { label: 'Activity Log', path: '/admin/users/activity' }
+
+              style={{ 
+
+                backgroundColor: '#F5F5F5',      ]      id: 'transactions',      id: 'transactions',
+
+                color: '#2C3E50' 
+
+              }}    },
+
+              onMouseEnter={(e) => {
+
+                e.currentTarget.style.backgroundColor = '#2C3E50';    {      label: 'Transactions',      label: 'Transactions',
+
+                e.currentTarget.style.color = '#FFFFFF';
+
+              }}      id: 'settings',
+
+              onMouseLeave={(e) => {
+
+                e.currentTarget.style.backgroundColor = '#F5F5F5';      label: 'Settings',      icon: '💰',      icon: '💰',
+
+                e.currentTarget.style.color = '#2C3E50';
+
+              }}      icon: '⚙️',
+
+            >
+
+              <span className="text-lg font-bold">←</span>      path: '/admin/settings',      path: '/admin/transactions',      path: '/admin/transactions',
+
+            </button>
+
+          )}      subItems: [
+
+        </div>
+
+                { label: 'Store Info', path: '/admin/settings/store' },      subItems: [      subItems: [
+
+        {isCollapsed && (
+
+          <div className="flex justify-center mt-2">        { label: 'Payment Methods', path: '/admin/settings/payment' },
+
+            <button
+
+              onClick={() => setIsCollapsed(!isCollapsed)}        { label: 'Notifications', path: '/admin/settings/notifications' }        { label: "Today's Sales", path: '/admin/transactions/today' },        { label: "Today's Sales", path: '/admin/transactions/today' },
+
+              className="p-1.5 rounded-lg transition-all duration-200"
+
+              style={{       ]
+
+                backgroundColor: '#F5F5F5',
+
+                color: '#2C3E50'     }        { label: 'Transaction History', path: '/admin/transactions/history' }        { label: 'Transaction History', path: '/admin/transactions/history' }
+
+              }}
+
+              onMouseEnter={(e) => {  ];
+
+                e.currentTarget.style.backgroundColor = '#2C3E50';
+
+                e.currentTarget.style.color = '#FFFFFF';      ]      ]
+
+              }}
+
+              onMouseLeave={(e) => {  const toggleExpanded = (itemId) => {
+
+                e.currentTarget.style.backgroundColor = '#F5F5F5';
+
+                e.currentTarget.style.color = '#2C3E50';    setExpandedItems(prev => ({    },    },
+
+              }}
+
+            >      ...prev,
+
+              <span className="text-sm font-bold">→</span>
+
+            </button>      [itemId]: !prev[itemId]    {    {
+
+          </div>
+
+        )}    }));
+
+      </div>
+
+  };      id: 'reports',      id: 'reports',
+
+      <nav className="flex-1 overflow-y-auto py-4">
+
+        <ul className="space-y-1 px-3">
+
+          {menuItems.map((item) => (
+
+            <li key={item.id}>  const isActive = (path) => {      label: 'Reports',      label: 'Reports',
+
+              <div>
+
+                <Link    if (path === '/admin') {
+
+                  to={item.path}
+
+                  className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${      return location.pathname === '/admin';      icon: '📈',      icon: '📈',
+
+                    isParentActive(item) ? 'shadow-md' : ''
+
+                  }`}    }
+
+                  style={{
+
+                    backgroundColor: isParentActive(item) ? '#2C3E50' : 'transparent',    return location.pathname.startsWith(path);      path: '/admin/reports',      path: '/admin/reports',
+
+                    color: isParentActive(item) ? '#FFFFFF' : '#2C3E50'
+
+                  }}  };
+
+                  onMouseEnter={(e) => {
+
+                    if (!isParentActive(item)) {      subItems: [      subItems: [
+
+                      e.currentTarget.style.backgroundColor = '#F5F5F5';
+
+                    }  const isParentActive = (item) => {
+
+                  }}
+
+                  onMouseLeave={(e) => {    if (isActive(item.path)) return true;        { label: 'Sales Report', path: '/admin/reports/sales' },        { label: 'Sales Report', path: '/admin/reports/sales' },
+
+                    if (!isParentActive(item)) {
+
+                      e.currentTarget.style.backgroundColor = 'transparent';    return item.subItems.some(subItem => isActive(subItem.path));
+
+                    }
+
+                  }}  };        { label: 'Stock Report', path: '/admin/reports/stock' },        { label: 'Stock Report', path: '/admin/reports/stock' },
+
+                  onClick={(e) => {
+
+                    if (item.subItems.length > 0 && !isCollapsed) {
+
+                      e.preventDefault();
+
+                      toggleExpanded(item.id);  return (        { label: 'Profit Analysis', path: '/admin/reports/profit' }        { label: 'Profit Analysis', path: '/admin/reports/profit' }
+
+                    }
+
+                  }}    <div 
+
+                >
+
+                  <span className="text-xl mr-3">{item.icon}</span>      className={`fixed left-0 top-0 h-full transition-all duration-300 z-40 shadow-xl ${      ]      ]
+
+                  {!isCollapsed && (
+
+                    <>        isCollapsed ? 'w-16' : 'w-64'
+
+                      <span className="flex-1 font-semibold text-sm">{item.label}</span>
+
+                      {item.subItems.length > 0 && (      }`}    },    },
+
+                        <span 
+
+                          className={`transform transition-transform duration-200 text-xs ${      style={{ backgroundColor: '#FFFFFF', borderRight: '2px solid #E0E0E0' }}
+
+                            expandedItems[item.id] ? 'rotate-90' : ''
+
+                          }`}    >    {    {
+
+                        >
+
+                          ▶      {/* Sidebar Header - Logo */}
+
+                        </span>
+
+                      )}      <div className="p-6 border-b" style={{ borderColor: '#E0E0E0' }}>      id: 'users',      id: 'users',
+
+                    </>
+
+                  )}        <div className="flex items-center justify-between">
+
+                </Link>
+
+          <div className={`flex ${isCollapsed ? 'justify-center w-full' : 'justify-center flex-1'}`}>      label: 'User Management',      label: 'User Management',
+
+                {!isCollapsed && item.subItems.length > 0 && expandedItems[item.id] && (
+
+                  <ul className="mt-2 space-y-1">            <img 
+
+                    {item.subItems.map((subItem, index) => (
+
+                      <li key={index}>              src={logoSellify}       icon: '👥',      icon: '👥',
+
+                        <Link
+
+                          to={subItem.path}              alt="Sellify Logo" 
+
+                          className="flex items-center px-12 py-2.5 text-sm rounded-lg transition-all duration-200"
+
+                          style={{              className={isCollapsed ? "w-10 h-10 object-contain" : "w-20 h-20 object-contain"}      path: '/admin/users',      path: '/admin/users',
+
+                            backgroundColor: isActive(subItem.path) ? '#E8F4F8' : 'transparent',
+
+                            color: isActive(subItem.path) ? '#2C3E50' : '#7F8C8D',            />
+
+                            borderLeft: isActive(subItem.path) ? '3px solid #2C3E50' : '3px solid transparent'
+
+                          }}          </div>      subItems: [      subItems: [
+
+                          onMouseEnter={(e) => {
+
+                            if (!isActive(subItem.path)) {          
+
+                              e.currentTarget.style.backgroundColor = '#F8F9FA';
+
+                              e.currentTarget.style.color = '#2C3E50';          {!isCollapsed && (        { label: 'Kasir Accounts', path: '/admin/users' },        { label: 'Kasir Accounts', path: '/admin/users' },
+
+                            }
+
+                          }}            <button
+
+                          onMouseLeave={(e) => {
+
+                            if (!isActive(subItem.path)) {              onClick={() => setIsCollapsed(!isCollapsed)}        { label: 'Activity Log', path: '/admin/users/activity' }        { label: 'Activity Log', path: '/admin/users/activity' }
+
+                              e.currentTarget.style.backgroundColor = 'transparent';
+
+                              e.currentTarget.style.color = '#7F8C8D';              className="p-2 rounded-lg transition-all duration-200 ml-2"
+
+                            }
+
+                          }}              style={{       ]      ]
+
+                        >
+
+                          <span className="mr-2 font-bold">•</span>                backgroundColor: '#F5F5F5',
+
+                          <span className="font-medium">{subItem.label}</span>
+
+                        </Link>                color: '#2C3E50'     },    },
+
+                      </li>
+
+                    ))}              }}
+
+                  </ul>
+
+                )}              onMouseEnter={(e) => {    {    {
+
+              </div>
+
+            </li>                e.currentTarget.style.backgroundColor = '#2C3E50';
+
+          ))}
+
+        </ul>                e.currentTarget.style.color = '#FFFFFF';      id: 'settings',      id: 'settings',
+
+      </nav>
+
+              }}
+
+      {!isCollapsed && (
+
+        <div className="p-4 border-t" style={{ borderColor: '#E0E0E0' }}>              onMouseLeave={(e) => {      label: 'Settings',      label: 'Settings',
+
+          <div className="flex items-center space-x-3 px-2">
+
+            <div                 e.currentTarget.style.backgroundColor = '#F5F5F5';
+
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
+
+              style={{ backgroundColor: '#2C3E50' }}                e.currentTarget.style.color = '#2C3E50';      icon: '⚙️',      icon: '⚙️',
+
+            >
+
+              <span className="text-base font-bold" style={{ color: '#FFFFFF' }}>A</span>              }}
+
+            </div>
+
+            <div className="flex-1">            >      path: '/admin/settings',      path: '/admin/settings',
+
+              <p className="text-sm font-bold" style={{ color: '#2C3E50' }}>Admin</p>
+
+              <p className="text-xs" style={{ color: '#7F8C8D' }}>Administrator</p>              <span className="text-lg font-bold">←</span>
+
+            </div>
+
+          </div>            </button>      subItems: [      subItems: [
+
+        </div>
+
+      )}          )}
+
+    </div>
+
+  );        </div>        { label: 'Store Info', path: '/admin/settings/store' },        { label: 'Store Info', path: '/admin/settings/store' },
+
+};
+
+        
+
+export default AdminSidebar;
+
+        {isCollapsed && (        { label: 'Payment Methods', path: '/admin/settings/payment' },        { label: 'Payment Methods', path: '/admin/settings/payment' },
+
+          <div className="flex justify-center mt-2">
+
+            <button        { label: 'Notifications', path: '/admin/settings/notifications' }        { label: 'Notifications', path: '/admin/settings/notifications' }
+
+              onClick={() => setIsCollapsed(!isCollapsed)}
+
+              className="p-1.5 rounded-lg transition-all duration-200"      ]      ]
+
+              style={{ 
+
+                backgroundColor: '#F5F5F5',    }    }
+
+                color: '#2C3E50' 
+
+              }}  ];  ];
+
+              onMouseEnter={(e) => {
+
+                e.currentTarget.style.backgroundColor = '#2C3E50';
+
+                e.currentTarget.style.color = '#FFFFFF';
+
+              }}  const toggleExpanded = (itemId) => {  const toggleExpanded = (itemId) => {
+
+              onMouseLeave={(e) => {
+
+                e.currentTarget.style.backgroundColor = '#F5F5F5';    setExpandedItems(prev => ({    setExpandedItems(prev => ({
+
+                e.currentTarget.style.color = '#2C3E50';
+
+              }}      ...prev,      ...prev,
+
+            >
+
+              <span className="text-sm font-bold">→</span>      [itemId]: !prev[itemId]      [itemId]: !prev[itemId]
+
+            </button>
+
+          </div>    }));    }));
+
+        )}
+
+      </div>  };  };
+
+
+
+      {/* Menu Items */}
+
+      <nav className="flex-1 overflow-y-auto py-4">
+
+        <ul className="space-y-1 px-3">  const isActive = (path) => {  // FIX: Better active state detection
+
+          {menuItems.map((item) => (
+
+            <li key={item.id}>    if (path === '/admin') {  const isActive = (path) => {
+
+              <div>
+
+                <Link      return location.pathname === '/admin';    if (path === '/admin') {
+
+                  to={item.path}
+
+                  className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${    }      // Dashboard only active on exact /admin path
+
+                    isParentActive(item) ? 'shadow-md' : ''
+
+                  }`}    return location.pathname.startsWith(path);      return location.pathname === '/admin';
+
+                  style={{
+
+                    backgroundColor: isParentActive(item) ? '#2C3E50' : 'transparent',  };    }
+
+                    color: isParentActive(item) ? '#FFFFFF' : '#2C3E50'
+
+                  }}    // For other paths, check if current path starts with the menu path
+
+                  onMouseEnter={(e) => {
+
+                    if (!isParentActive(item)) {  const isParentActive = (item) => {    return location.pathname.startsWith(path);
+
+                      e.currentTarget.style.backgroundColor = '#F5F5F5';
+
+                    }    if (isActive(item.path)) return true;  };
+
+                  }}
+
+                  onMouseLeave={(e) => {    return item.subItems.some(subItem => isActive(subItem.path));
+
+                    if (!isParentActive(item)) {
+
+                      e.currentTarget.style.backgroundColor = 'transparent';  };  const isParentActive = (item) => {
+
+                    }
+
+                  }}    // Check if main item path is active
+
+                  onClick={(e) => {
+
+                    if (item.subItems.length > 0 && !isCollapsed) {  return (    if (isActive(item.path)) return true;
+
+                      e.preventDefault();
+
+                      toggleExpanded(item.id);    <div     
+
+                    }
+
+                  }}      className={`fixed left-0 top-0 h-full transition-all duration-300 z-40 shadow-xl ${    // Check if any sub-item is active
+
+                >
+
+                  <span className="text-xl mr-3">{item.icon}</span>        isCollapsed ? 'w-16' : 'w-64'    return item.subItems.some(subItem => isActive(subItem.path));
+
+                  {!isCollapsed && (
+
+                    <>      }`}  };
+
+                      <span className="flex-1 font-semibold text-sm">{item.label}</span>
+
+                      {item.subItems.length > 0 && (      style={{ backgroundColor: '#FFFFFF', borderRight: '2px solid #E0E0E0' }}
+
+                        <span 
+
+                          className={`transform transition-transform duration-200 text-xs ${    >  return (
+
+                            expandedItems[item.id] ? 'rotate-90' : ''
+
+                          }`}      {/* Sidebar Header - Logo */}    <div 
+
+                        >
+
+                          ▶      <div className="p-6 border-b" style={{ borderColor: '#E0E0E0' }}>      className={`fixed left-0 top-0 h-full transition-all duration-300 z-40 ${
+
+                        </span>
+
+                      )}        <div className="flex items-center justify-between">        isCollapsed ? 'w-16' : 'w-64'
+
+                    </>
+
+                  )}          <div className={`flex ${isCollapsed ? 'justify-center w-full' : 'justify-center flex-1'}`}>      }`}
+
+                </Link>
+
+            <img       style={{ backgroundColor: '#2C3E50' }}
+
+                {!isCollapsed && item.subItems.length > 0 && expandedItems[item.id] && (
+
+                  <ul className="mt-2 space-y-1">              src={logoSellify}     >
+
+                    {item.subItems.map((subItem, index) => (
+
+                      <li key={index}>              alt="Sellify Logo"       {/* Sidebar Header - Logo Only & Centered */}
+
+                        <Link
+
+                          to={subItem.path}              className={isCollapsed ? "w-10 h-10 object-contain" : "w-20 h-20 object-contain"}      <div className="p-6 border-b" style={{ borderColor: '#34495E' }}>
+
+                          className="flex items-center px-12 py-2.5 text-sm rounded-lg transition-all duration-200"
+
+                          style={{            />        <div className="flex items-center justify-between">
+
+                            backgroundColor: isActive(subItem.path) ? '#E8F4F8' : 'transparent',
+
+                            color: isActive(subItem.path) ? '#2C3E50' : '#7F8C8D',          </div>          {/* Logo - Always centered, SUPER GEDE banget! */}
+
+                            borderLeft: isActive(subItem.path) ? '3px solid #2C3E50' : '3px solid transparent'
+
+                          }}                    <div className={`flex ${isCollapsed ? 'justify-center w-full' : 'justify-center flex-1'}`}>
+
+                          onMouseEnter={(e) => {
+
+                            if (!isActive(subItem.path)) {          {!isCollapsed && (            <img 
+
+                              e.currentTarget.style.backgroundColor = '#F8F9FA';
+
+                              e.currentTarget.style.color = '#2C3E50';            <button              src={logoSellify} 
+
+                            }
+
+                          }}              onClick={() => setIsCollapsed(!isCollapsed)}              alt="Sellify Logo" 
+
+                          onMouseLeave={(e) => {
+
+                            if (!isActive(subItem.path)) {              className="p-2 rounded-lg transition-all duration-200 ml-2"              className={isCollapsed ? "w-12 h-12 object-contain" : "w-24 h-24 object-contain"} // SUPER GEDE: w-24 h-24 (96px!)
+
+                              e.currentTarget.style.backgroundColor = 'transparent';
+
+                              e.currentTarget.style.color = '#7F8C8D';              style={{             />
+
+                            }
+
+                          }}                backgroundColor: '#F5F5F5',          </div>
+
+                        >
+
+                          <span className="mr-2 font-bold">•</span>                color: '#2C3E50'           
+
+                          <span className="font-medium">{subItem.label}</span>
+
+                        </Link>              }}          {/* Collapse Button - Only show when expanded */}
+
+                      </li>
+
+                    ))}              onMouseEnter={(e) => {          {!isCollapsed && (
+
+                  </ul>
+
+                )}                e.currentTarget.style.backgroundColor = '#2C3E50';            <button
+
+              </div>
+
+            </li>                e.currentTarget.style.color = '#FFFFFF';              onClick={() => setIsCollapsed(!isCollapsed)}
+
+          ))}
+
+        </ul>              }}              className="p-2 rounded-md transition-colors duration-200 ml-2"
+
+      </nav>
+
+              onMouseLeave={(e) => {              style={{ 
+
+      {/* User Info (Bottom) */}
+
+      {!isCollapsed && (                e.currentTarget.style.backgroundColor = '#F5F5F5';                backgroundColor: 'transparent',
+
+        <div className="p-4 border-t" style={{ borderColor: '#E0E0E0' }}>
+
+          <div className="flex items-center space-x-3 px-2">                e.currentTarget.style.color = '#2C3E50';                color: '#ECF0F1' 
+
+            <div 
+
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"              }}              }}
+
+              style={{ backgroundColor: '#2C3E50' }}
+
+            >            >              onMouseEnter={(e) => e.target.style.backgroundColor = '#34495E'}
+
+              <span className="text-base font-bold" style={{ color: '#FFFFFF' }}>A</span>
+
+            </div>              <span className="text-lg font-bold">←</span>              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+
+            <div className="flex-1">
+
+              <p className="text-sm font-bold" style={{ color: '#2C3E50' }}>Admin</p>            </button>            >
+
+              <p className="text-xs" style={{ color: '#7F8C8D' }}>Administrator</p>
+
+            </div>          )}              <span className="text-lg">←</span>
+
+          </div>
+
+        </div>        </div>            </button>
+
+      )}
+
+    </div>                  )}
+
+  );
+
+};        {isCollapsed && (        </div>
+
+
+
+export default AdminSidebar;          <div className="flex justify-center mt-2">        
+
+
+            <button        {/* Collapse button for collapsed state - separate row */}
+
+              onClick={() => setIsCollapsed(!isCollapsed)}        {isCollapsed && (
+
+              className="p-1.5 rounded-lg transition-all duration-200"          <div className="flex justify-center mt-2">
+
+              style={{             <button
+
+                backgroundColor: '#F5F5F5',              onClick={() => setIsCollapsed(!isCollapsed)}
+
+                color: '#2C3E50'               className="p-1 rounded-md transition-colors duration-200"
+
+              }}              style={{ 
+
+              onMouseEnter={(e) => {                backgroundColor: 'transparent',
+
+                e.currentTarget.style.backgroundColor = '#2C3E50';                color: '#ECF0F1' 
+
+                e.currentTarget.style.color = '#FFFFFF';              }}
+
+              }}              onMouseEnter={(e) => e.target.style.backgroundColor = '#34495E'}
+
+              onMouseLeave={(e) => {              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+
+                e.currentTarget.style.backgroundColor = '#F5F5F5';            >
+
+                e.currentTarget.style.color = '#2C3E50';              <span className="text-sm">→</span>
+
+              }}            </button>
+
+            >          </div>
+
+              <span className="text-sm font-bold">→</span>        )}
+
+            </button>      </div>
+
+          </div>
+
+        )}      {/* Menu Items */}
+
+      </div>      <nav className="flex-1 overflow-y-auto py-4">
+
+        <ul className="space-y-1">
+
+      {/* Menu Items */}          {menuItems.map((item) => (
+
+      <nav className="flex-1 overflow-y-auto py-4">            <li key={item.id}>
+
+        <ul className="space-y-1 px-3">              {/* Main Menu Item */}
+
+          {menuItems.map((item) => (              <div>
+
+            <li key={item.id}>                <Link
+
+              <div>                  to={item.path}
+
+                <Link                  className="flex items-center px-4 py-3 transition-all duration-200 rounded-lg mx-2"
+
+                  to={item.path}                  style={{
+
+                  className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${                    backgroundColor: isParentActive(item) ? '#FFFFFF' : 'transparent',
+
+                    isParentActive(item) ? 'shadow-md' : ''                    color: isParentActive(item) ? '#2C3E50' : '#ECF0F1'
+
+                  }`}                  }}
+
+                  style={{                  onMouseEnter={(e) => {
+
+                    backgroundColor: isParentActive(item) ? '#2C3E50' : 'transparent',                    if (!isParentActive(item)) {
+
+                    color: isParentActive(item) ? '#FFFFFF' : '#2C3E50'                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+
+                  }}                    }
+
+                  onMouseEnter={(e) => {                  }}
+
+                    if (!isParentActive(item)) {                  onMouseLeave={(e) => {
+
+                      e.currentTarget.style.backgroundColor = '#F5F5F5';                    if (!isParentActive(item)) {
+
+                    }                      e.currentTarget.style.backgroundColor = 'transparent';
+
+                  }}                    }
+
+                  onMouseLeave={(e) => {                  }}
+
+                    if (!isParentActive(item)) {                  onClick={() => {
+
+                      e.currentTarget.style.backgroundColor = 'transparent';                    if (item.subItems.length > 0 && !isCollapsed) {
+
+                    }                      toggleExpanded(item.id);
+
+                  }}                    }
+
+                  onClick={(e) => {                  }}
+
+                    if (item.subItems.length > 0 && !isCollapsed) {                >
+
+                      e.preventDefault();                  <span className="text-xl mr-3">{item.icon}</span>
+
+                      toggleExpanded(item.id);                  {!isCollapsed && (
+
+                    }                    <>
+
+                  }}                      <span className="flex-1 font-medium">{item.label}</span>
+
+                >                      {item.subItems.length > 0 && (
+
+                  <span className="text-xl mr-3">{item.icon}</span>                        <span className={`transform transition-transform duration-200 ${
+
+                  {!isCollapsed && (                          expandedItems[item.id] ? 'rotate-90' : ''
+
+                    <>                        }`}>
+
+                      <span className="flex-1 font-semibold text-sm">{item.label}</span>                          ▶
+
+                      {item.subItems.length > 0 && (                        </span>
+
+                        <span                       )}
+
+                          className={`transform transition-transform duration-200 text-xs ${                    </>
+
+                            expandedItems[item.id] ? 'rotate-90' : ''                  )}
+
+                          }`}                </Link>
+
+                        >
+
+                          ▶                {/* Sub Menu Items */}
+
+                        </span>                {!isCollapsed && item.subItems.length > 0 && expandedItems[item.id] && (
+
+                      )}                  <ul className="mt-1 mx-2 rounded-lg overflow-hidden" style={{ backgroundColor: 'rgba(52, 73, 94, 0.5)' }}>
+
+                    </>                    {item.subItems.map((subItem, index) => (
+
+                  )}                      <li key={index}>
+
+                </Link>                        <Link
+
+                          to={subItem.path}
+
+                {!isCollapsed && item.subItems.length > 0 && expandedItems[item.id] && (                          className="flex items-center px-10 py-2 text-sm transition-all duration-200"
+
+                  <ul className="mt-2 space-y-1">                          style={{
+
+                    {item.subItems.map((subItem, index) => (                            backgroundColor: isActive(subItem.path) ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+
+                      <li key={index}>                            color: isActive(subItem.path) ? '#FFFFFF' : '#BDC3C7'
+
+                        <Link                          }}
+
+                          to={subItem.path}                          onMouseEnter={(e) => {
+
+                          className="flex items-center px-12 py-2.5 text-sm rounded-lg transition-all duration-200"                            if (!isActive(subItem.path)) {
+
+                          style={{                              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+
+                            backgroundColor: isActive(subItem.path) ? '#E8F4F8' : 'transparent',                              e.currentTarget.style.color = '#ECF0F1';
+
+                            color: isActive(subItem.path) ? '#2C3E50' : '#7F8C8D',                            }
+
+                            borderLeft: isActive(subItem.path) ? '3px solid #2C3E50' : '3px solid transparent'                          }}
+
+                          }}                          onMouseLeave={(e) => {
+
+                          onMouseEnter={(e) => {                            if (!isActive(subItem.path)) {
+
+                            if (!isActive(subItem.path)) {                              e.currentTarget.style.backgroundColor = 'transparent';
+
+                              e.currentTarget.style.backgroundColor = '#F8F9FA';                              e.currentTarget.style.color = '#BDC3C7';
+
+                              e.currentTarget.style.color = '#2C3E50';                            }
+
+                            }                          }}
+
+                          }}                        >
+
+                          onMouseLeave={(e) => {                          <span className="mr-2">•</span>
+
+                            if (!isActive(subItem.path)) {                          {subItem.label}
+
+                              e.currentTarget.style.backgroundColor = 'transparent';                        </Link>
+
+                              e.currentTarget.style.color = '#7F8C8D';                      </li>
+
+                            }                    ))}
+
+                          }}                  </ul>
+
+                        >                )}
+
+                          <span className="mr-2 font-bold">•</span>              </div>
+
+                          <span className="font-medium">{subItem.label}</span>            </li>
+
+                        </Link>          ))}
+
+                      </li>        </ul>
+
+                    ))}      </nav>
+
+                  </ul>
+
+                )}      {/* User Info (Bottom) */}
+
+              </div>      {!isCollapsed && (
+
+            </li>        <div className="p-4 border-t" style={{ borderColor: '#34495E' }}>
+
+          ))}          <div className="flex items-center space-x-3">
+
+        </ul>            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FFFFFF' }}>
+
+      </nav>              <span className="text-sm font-bold" style={{ color: '#2C3E50' }}>A</span>
+
+            </div>
+
+      {/* User Info (Bottom) */}            <div className="flex-1">
+
+      {!isCollapsed && (              <p className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Admin</p>
+
+        <div className="p-4 border-t" style={{ borderColor: '#E0E0E0' }}>              <p className="text-xs" style={{ color: '#BDC3C7' }}>Administrator</p>
+
+          <div className="flex items-center space-x-3 px-2">            </div>
+
+            <div           </div>
+
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"        </div>
+
+              style={{ backgroundColor: '#2C3E50' }}      )}
+
+            >    </div>
+
+              <span className="text-base font-bold" style={{ color: '#FFFFFF' }}>A</span>  );
+
+            </div>};
+
+            <div className="flex-1">
+
+              <p className="text-sm font-bold" style={{ color: '#2C3E50' }}>Admin</p>export default AdminSidebar;
+
+              <p className="text-xs" style={{ color: '#7F8C8D' }}>Administrator</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminSidebar;

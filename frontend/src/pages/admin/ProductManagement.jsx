@@ -125,16 +125,16 @@ const ProductManagement = () => {
     };
 
     return (
-      <div className="rounded-lg shadow-lg p-6 mb-6" style={{ backgroundColor: '#F7E9A0' }}>
+      <div className="rounded-lg shadow-lg p-6 mb-6" style={{ backgroundColor: '#FFFFFF' }}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold" style={{ color: '#3E3E3E' }}>Add New Product</h2>
+          <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>Add New Product</h2>
           <button 
             onClick={() => {
               setShowAddForm(false);
               navigate('/admin/products');
             }}
             className="text-2xl font-bold hover:opacity-70"
-            style={{ color: '#3E3E3E' }}
+            style={{ color: '#2C3E50' }}
           >
             ×
           </button>
@@ -143,15 +143,15 @@ const ProductManagement = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Row 1: Product Name ONLY - HAPUS Barcode Section */}
           <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Product Name *</label>
+            <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Name *</label>
             <input
               type="text"
               required
               className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
               style={{ 
-                borderColor: '#E9C46A',
-                backgroundColor: '#FFFCF2',
-                color: '#3E3E3E'
+                borderColor: '#2C3E50',
+                backgroundColor: '#F8F9FA',
+                color: '#2C3E50'
               }}
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -162,14 +162,14 @@ const ProductManagement = () => {
           {/* Row 2: Category & Image Upload - sekarang jadi Row 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Category *</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Category *</label>
               <select
                 required
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.category_id}
                 onChange={(e) => setFormData({...formData, category_id: e.target.value})}
@@ -182,16 +182,16 @@ const ProductManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Product Image</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Image</label>
               <div className="space-y-2">
                 <input
                   type="file"
                   accept="image/*"
                   className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium"
                   style={{ 
-                    borderColor: '#E9C46A',
-                    backgroundColor: '#FFFCF2',
-                    color: '#3E3E3E'
+                    borderColor: '#2C3E50',
+                    backgroundColor: '#F8F9FA',
+                    color: '#2C3E50'
                   }}
                   onChange={handleImageChange}
                 />
@@ -199,12 +199,12 @@ const ProductManagement = () => {
                 {/* Image Preview */}
                 {imagePreview && (
                   <div className="mt-2">
-                    <p className="text-xs mb-1" style={{ color: '#3E3E3E' }}>Preview:</p>
+                    <p className="text-xs mb-1" style={{ color: '#2C3E50' }}>Preview:</p>
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
                       className="w-20 h-20 object-cover rounded-md border-2"
-                      style={{ borderColor: '#E9C46A' }}
+                      style={{ borderColor: '#2C3E50' }}
                     />
                     <button
                       type="button"
@@ -213,14 +213,14 @@ const ProductManagement = () => {
                         setImagePreview(null);
                       }}
                       className="ml-2 text-xs hover:underline"
-                      style={{ color: '#3E3E3E' }}
+                      style={{ color: '#2C3E50' }}
                     >
                       Remove
                     </button>
                   </div>
                 )}
                 
-                <p className="text-xs opacity-60" style={{ color: '#3E3E3E' }}>
+                <p className="text-xs opacity-60" style={{ color: '#2C3E50' }}>
                   Supported: JPG, PNG, GIF (Max 5MB)
                 </p>
               </div>
@@ -230,7 +230,7 @@ const ProductManagement = () => {
           {/* Row 3: Price & Stock Only - HAPUS Min Stock */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Price *</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Price *</label>
               <input
                 type="number"
                 required
@@ -238,9 +238,9 @@ const ProductManagement = () => {
                 step="0.01"
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.price}
                 onChange={(e) => setFormData({...formData, price: e.target.value})}
@@ -249,21 +249,21 @@ const ProductManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Stock</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Stock</label>
               <input
                 type="number"
                 min="0"
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.stock}
                 onChange={(e) => setFormData({...formData, stock: e.target.value})}
                 placeholder="0"
               />
-              <p className="text-xs opacity-60 mt-1" style={{ color: '#3E3E3E' }}>
+              <p className="text-xs opacity-60 mt-1" style={{ color: '#2C3E50' }}>
                 💡 Min stock will be auto-calculated (10% of stock)
               </p>
             </div>
@@ -273,14 +273,14 @@ const ProductManagement = () => {
 
           {/* Row 4: Description */}
           <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Description</label>
+            <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Description</label>
             <textarea
               rows="3"
               className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 resize-none"
               style={{ 
-                borderColor: '#E9C46A',
-                backgroundColor: '#FFFCF2',
-                color: '#3E3E3E'
+                borderColor: '#2C3E50',
+                backgroundColor: '#F8F9FA',
+                color: '#2C3E50'
               }}
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -299,8 +299,8 @@ const ProductManagement = () => {
               className="px-6 py-2 rounded-md font-medium border-2 transition-all duration-200"
               style={{ 
                 backgroundColor: 'transparent',
-                color: '#3E3E3E',
-                borderColor: '#E9C46A'
+                color: '#2C3E50',
+                borderColor: '#2C3E50'
               }}
             >
               Cancel
@@ -310,8 +310,8 @@ const ProductManagement = () => {
               disabled={submitting}
               className="px-6 py-2 rounded-md font-medium transition-all duration-200 disabled:opacity-50"
               style={{ 
-                backgroundColor: '#E9C46A',
-                color: '#3E3E3E'
+                backgroundColor: '#2C3E50',
+                color: '#2C3E50'
               }}
             >
               {submitting ? 'Adding...' : 'Add Product'}
@@ -367,8 +367,8 @@ const ProductManagement = () => {
           displayValue: true,
           fontSize: 16,
           margin: 10,
-          background: "#FFFCF2",
-          lineColor: "#3E3E3E"
+          background: "#F8F9FA",
+          lineColor: "#2C3E50"
         });
         setBarcodeImage(canvas.toDataURL());
       } catch (error) {
@@ -384,16 +384,16 @@ const ProductManagement = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FFFFFF' }}>
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold flex items-center" style={{ color: '#3E3E3E' }}>
+            <h2 className="text-2xl font-bold flex items-center" style={{ color: '#2C3E50' }}>
               📦 Product Details
             </h2>
             <button 
               onClick={() => setShowDetailModal(false)}
               className="text-3xl font-bold hover:opacity-70 transition-opacity"
-              style={{ color: '#3E3E3E' }}
+              style={{ color: '#2C3E50' }}
             >
               ×
             </button>
@@ -402,7 +402,7 @@ const ProductManagement = () => {
           {/* Product Image */}
           {selectedProduct.image_url && (
             <div className="text-center mb-6">
-              <div className="inline-block p-4 rounded-lg border-2" style={{ backgroundColor: '#FFFCF2', borderColor: '#E9C46A' }}>
+              <div className="inline-block p-4 rounded-lg border-2" style={{ backgroundColor: '#F8F9FA', borderColor: '#2C3E50' }}>
                 <img 
                   src={`http://localhost:5000${selectedProduct.image_url}`} 
                   alt={selectedProduct.name}
@@ -417,46 +417,46 @@ const ProductManagement = () => {
             {/* Left Column */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Product Name</h3>
-                <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>{selectedProduct.name}</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Product Name</h3>
+                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.name}</p>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Selling Price</h3>
-                <p className="text-xl font-bold" style={{ color: '#3E3E3E' }}>Rp {selectedProduct.price?.toLocaleString()}</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Selling Price</h3>
+                <p className="text-xl font-bold" style={{ color: '#2C3E50' }}>Rp {selectedProduct.price?.toLocaleString()}</p>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Profit</h3>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Profit</h3>
                 <p className="text-lg font-bold" style={{ color: profit >= 0 ? '#4CAF50' : '#FF5722' }}>
                   Rp {profit.toLocaleString()} ({profitPercentage}%)
                 </p>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Current Stock</h3>
-                <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>{selectedProduct.stock} units</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Current Stock</h3>
+                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.stock} units</p>
               </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Category</h3>
-                <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>{selectedProduct.category_name}</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Category</h3>
+                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.category_name}</p>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Cost Price</h3>
-                <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>Rp {(selectedProduct.cost || 0).toLocaleString()}</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Cost Price</h3>
+                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>Rp {(selectedProduct.cost || 0).toLocaleString()}</p>
               </div>
 
               {/* Barcode Section */}
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Barcode</h3>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Barcode</h3>
                 {selectedProduct.barcode ? (
                   <div className="mt-2">
-                    <div className="p-3 rounded-md border-2 bg-white text-center" style={{ borderColor: '#E9C46A' }}>
+                    <div className="p-3 rounded-md border-2 bg-white text-center" style={{ borderColor: '#2C3E50' }}>
                       {barcodeImage ? (
                         <div>
                           <img 
@@ -467,20 +467,20 @@ const ProductManagement = () => {
                           />
                         </div>
                       ) : (
-                        <p className="text-lg font-mono font-bold" style={{ color: '#3E3E3E' }}>
+                        <p className="text-lg font-mono font-bold" style={{ color: '#2C3E50' }}>
                           {selectedProduct.barcode}
                         </p>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm opacity-60" style={{ color: '#3E3E3E' }}>No barcode</p>
+                  <p className="text-sm opacity-60" style={{ color: '#2C3E50' }}>No barcode</p>
                 )}
               </div>
 
               <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#3E3E3E' }}>Min Stock Alert</h3>
-                <p className="text-lg font-bold" style={{ color: '#3E3E3E' }}>{selectedProduct.min_stock} units</p>
+                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Min Stock Alert</h3>
+                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.min_stock} units</p>
               </div>
             </div>
           </div>
@@ -488,9 +488,9 @@ const ProductManagement = () => {
           {/* Description */}
           {selectedProduct.description && (
             <div className="mt-6">
-              <h3 className="text-sm font-medium opacity-70 mb-2" style={{ color: '#3E3E3E' }}>Description</h3>
-              <div className="p-4 rounded-md border-2" style={{ backgroundColor: '#FFFCF2', borderColor: '#E9C46A' }}>
-                <p className="text-sm leading-relaxed" style={{ color: '#3E3E3E' }}>
+              <h3 className="text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>Description</h3>
+              <div className="p-4 rounded-md border-2" style={{ backgroundColor: '#F8F9FA', borderColor: '#2C3E50' }}>
+                <p className="text-sm leading-relaxed" style={{ color: '#2C3E50' }}>
                   {selectedProduct.description}
                 </p>
               </div>
@@ -518,8 +518,8 @@ const ProductManagement = () => {
               onClick={() => setShowDetailModal(false)}
               className="px-8 py-3 rounded-md font-medium transition-all duration-200"
               style={{ 
-                backgroundColor: '#E9C46A',
-                color: '#3E3E3E'
+                backgroundColor: '#2C3E50',
+                color: '#2C3E50'
               }}
             >
               Close
@@ -587,16 +587,16 @@ const ProductManagement = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#F7E9A0' }}>
+        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold" style={{ color: '#3E3E3E' }}>✏️ Edit Product</h2>
+            <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>✏️ Edit Product</h2>
             <button 
               onClick={() => {
                 setShowEditForm(false);
                 setEditingProduct(null);
               }}
               className="text-2xl font-bold hover:opacity-70"
-              style={{ color: '#3E3E3E' }}
+              style={{ color: '#2C3E50' }}
             >
               ×
             </button>
@@ -605,15 +605,15 @@ const ProductManagement = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Product Name */}
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Product Name *</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Name *</label>
               <input
                 type="text"
                 required
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -623,14 +623,14 @@ const ProductManagement = () => {
             {/* Category & Price */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Category *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Category *</label>
                 <select
                   required
                   className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                   style={{ 
-                    borderColor: '#E9C46A',
-                    backgroundColor: '#FFFCF2',
-                    color: '#3E3E3E'
+                    borderColor: '#2C3E50',
+                    backgroundColor: '#F8F9FA',
+                    color: '#2C3E50'
                   }}
                   value={formData.category_id}
                   onChange={(e) => setFormData({...formData, category_id: e.target.value})}
@@ -643,7 +643,7 @@ const ProductManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Price *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Price *</label>
                 <input
                   type="number"
                   required
@@ -651,9 +651,9 @@ const ProductManagement = () => {
                   step="0.01"
                   className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                   style={{ 
-                    borderColor: '#E9C46A',
-                    backgroundColor: '#FFFCF2',
-                    color: '#3E3E3E'
+                    borderColor: '#2C3E50',
+                    backgroundColor: '#F8F9FA',
+                    color: '#2C3E50'
                   }}
                   value={formData.price}
                   onChange={(e) => setFormData({...formData, price: e.target.value})}
@@ -663,15 +663,15 @@ const ProductManagement = () => {
 
             {/* Stock */}
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Stock</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Stock</label>
               <input
                 type="number"
                 min="0"
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.stock}
                 onChange={(e) => setFormData({...formData, stock: e.target.value})}
@@ -680,14 +680,14 @@ const ProductManagement = () => {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Description</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Description</label>
               <textarea
                 rows="3"
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 resize-none"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -697,19 +697,19 @@ const ProductManagement = () => {
             {/* Current Image Preview */}
             {imagePreview && (
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>Current Image</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Current Image</label>
                 <img 
                   src={imagePreview} 
                   alt="Current product" 
                   className="w-20 h-20 object-cover rounded-md border-2"
-                  style={{ borderColor: '#E9C46A' }}
+                  style={{ borderColor: '#2C3E50' }}
                 />
               </div>
             )}
 
             {/* New Image Upload */}
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#3E3E3E' }}>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>
                 {imagePreview ? 'Change Image' : 'Upload Image'}
               </label>
               <input
@@ -717,9 +717,9 @@ const ProductManagement = () => {
                 accept="image/*"
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
                 style={{ 
-                  borderColor: '#E9C46A',
-                  backgroundColor: '#FFFCF2',
-                  color: '#3E3E3E'
+                  borderColor: '#2C3E50',
+                  backgroundColor: '#F8F9FA',
+                  color: '#2C3E50'
                 }}
                 onChange={(e) => {
                   const file = e.target.files[0];
@@ -733,7 +733,7 @@ const ProductManagement = () => {
                   }
                 }}
               />
-              <p className="text-xs mt-1 opacity-70" style={{ color: '#3E3E3E' }}>
+              <p className="text-xs mt-1 opacity-70" style={{ color: '#2C3E50' }}>
                 Max file size: 5MB. Formats: JPG, PNG, GIF
               </p>
             </div>
@@ -749,8 +749,8 @@ const ProductManagement = () => {
                 className="px-6 py-2 rounded-md font-medium border-2 transition-all duration-200"
                 style={{ 
                   backgroundColor: 'transparent',
-                  color: '#3E3E3E',
-                  borderColor: '#E9C46A'
+                  color: '#2C3E50',
+                  borderColor: '#2C3E50'
                 }}
               >
                 Cancel
@@ -760,8 +760,8 @@ const ProductManagement = () => {
                 disabled={submitting}
                 className="px-6 py-2 rounded-md font-medium transition-all duration-200 disabled:opacity-50"
                 style={{ 
-                  backgroundColor: '#E9C46A',
-                  color: '#3E3E3E'
+                  backgroundColor: '#2C3E50',
+                  color: '#ffffff'
                 }}
               >
                 {submitting ? 'Updating...' : 'Update Product'}
@@ -775,10 +775,10 @@ const ProductManagement = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFCF2' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F8F9FA' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#E9C46A' }}></div>
-          <p className="mt-4" style={{ color: '#3E3E3E' }}>Loading products...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#2C3E50' }}></div>
+          <p className="mt-4" style={{ color: '#2C3E50' }}>Loading products...</p>
         </div>
       </div>
     );
@@ -789,31 +789,31 @@ const ProductManagement = () => {
       {/* Page Actions */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#3E3E3E' }}>
+          <h1 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
             Product Management
           </h1>
-          <p className="text-sm opacity-70" style={{ color: '#3E3E3E' }}>
+          <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
             Manage your store products and inventory
           </p>
         </div>
         <div className="flex space-x-4">
           <button
             onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 rounded-md font-medium transition-all duration-200"
+            className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
             style={{ 
-              backgroundColor: '#E9C46A',
-              color: '#3E3E3E'
+              backgroundColor: '#2C3E50',
+              color: '#FFFFFF'
             }}
           >
             + Add Product
           </button>
           <button
             onClick={() => navigate('/admin')}
-              className="px-4 py-2 rounded-md font-medium transition-all duration-200 border-2"
+              className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 border-2 hover:bg-gray-50"
               style={{ 
-                backgroundColor: 'transparent',
-                color: '#3E3E3E',
-                borderColor: '#E9C46A'
+                backgroundColor: '#FFFFFF',
+                color: '#2C3E50',
+                borderColor: '#2C3E50'
               }}
             >
               ← Back to Dashboard
@@ -825,31 +825,31 @@ const ProductManagement = () => {
         {showAddForm && <AddProductForm />}
 
         {/* Products List */}
-        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#F7E9A0' }}>
-          <h2 className="text-xl font-bold mb-4" style={{ color: '#3E3E3E' }}>
+        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
             All Products ({products.length})
           </h2>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2" style={{ borderColor: '#E9C46A' }}>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Image</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Product</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Category</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Price</th>
+                <tr className="border-b-2" style={{ borderColor: '#2C3E50' }}>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Image</th>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Product</th>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Category</th>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Price</th>
                   {/* HAPUS Cost column */}
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Stock</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Status</th>
-                  <th className="text-center py-2 px-4 font-medium" style={{ color: '#3E3E3E' }}>Actions</th>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Stock</th>
+                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Status</th>
+                  <th className="text-center py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
-                  <tr key={product.id} className="border-b hover:opacity-75 transition-opacity" style={{ borderColor: '#E9C46A' }}>
+                  <tr key={product.id} className="border-b hover:opacity-75 transition-opacity" style={{ borderColor: '#2C3E50' }}>
                     {/* Image */}
                     <td className="py-3 px-4">
-                      <div className="w-12 h-12 rounded-md border-2 flex items-center justify-center" style={{ borderColor: '#E9C46A', backgroundColor: '#FFFCF2' }}>
+                      <div className="w-12 h-12 rounded-md border-2 flex items-center justify-center" style={{ borderColor: '#2C3E50', backgroundColor: '#F8F9FA' }}>
                         {product.image_url ? (
                           <img 
                             src={`http://localhost:5000${product.image_url}`} 
@@ -865,24 +865,24 @@ const ProductManagement = () => {
                     {/* Product Info */}
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-medium" style={{ color: '#3E3E3E' }}>{product.name}</p>
+                        <p className="font-medium" style={{ color: '#2C3E50' }}>{product.name}</p>
                       </div>
                     </td>
 
                     {/* Category */}
-                    <td className="py-3 px-4" style={{ color: '#3E3E3E' }}>
+                    <td className="py-3 px-4" style={{ color: '#2C3E50' }}>
                       {product.category_name}
                     </td>
 
                     {/* Price (Selling Price Only) */}
-                    <td className="py-3 px-4 font-medium" style={{ color: '#3E3E3E' }}>
+                    <td className="py-3 px-4 font-medium" style={{ color: '#2C3E50' }}>
                       Rp {product.price?.toLocaleString() || '0'}
                     </td>
 
                     {/* HAPUS Cost column - jangan tampilkan di sini */}
 
                     {/* Stock */}
-                    <td className="py-3 px-4" style={{ color: '#3E3E3E' }}>
+                    <td className="py-3 px-4" style={{ color: '#2C3E50' }}>
                       {product.stock}
                     </td>
 
@@ -891,9 +891,9 @@ const ProductManagement = () => {
                       <span 
                         className="px-3 py-1 rounded-full text-xs font-medium"
                         style={{
-                          backgroundColor: product.stock_status === 'normal' ? '#E9C46A' : 
-                                          product.stock_status === 'low' ? '#FFD56B' : '#FF6B6B',
-                          color: '#3E3E3E'
+                          backgroundColor: product.stock_status === 'normal' ? '#2C3E50' : 
+                                          product.stock_status === 'low' ? '#ECF0F1' : '#FF6B6B',
+                          color: '#2C3E50'
                         }}
                       >
                         {product.stock_status === 'normal' ? 'Normal' :
@@ -906,23 +906,23 @@ const ProductManagement = () => {
                       <div className="flex justify-center space-x-2">
                         <button
                           onClick={() => handleViewProduct(product)}
-                          className="p-2 rounded-md transition-all duration-200 hover:scale-110"
-                          style={{ backgroundColor: '#E9C46A', color: '#3E3E3E' }}
+                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
+                          style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
                           title="View Details"
                         >
                           👁️
                         </button>
                         <button
                           onClick={() => handleEditProduct(product)}
-                          className="p-2 rounded-md transition-all duration-200 hover:scale-110"
-                          style={{ backgroundColor: '#FFD56B', color: '#3E3E3E' }}
+                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
+                          style={{ backgroundColor: '#3498DB', color: '#FFFFFF' }}
                           title="Edit Product"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product)}
-                          className="p-2 rounded-md transition-all duration-200 hover:scale-110"
+                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
                           style={{ backgroundColor: '#FF6B6B', color: '#FFFFFF' }}
                           title="Delete Product"
                         >
