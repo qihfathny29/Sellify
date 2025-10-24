@@ -4,7 +4,8 @@ const multer = require('multer');
 const path = require('path');
 const { 
   getUsers,
-  getUserById,       // TAMBAH INI
+  getUserById,
+  createUser,
   updateUser, 
   deleteUser,
   getProfile,
@@ -56,6 +57,9 @@ router.get('/test', (req, res) => {
 
 // Get all users (admin only)
 router.get('/', admin, getUsers);
+
+// Create new user (admin only)
+router.post('/', admin, createUser);
 
 // Get user by id
 router.get('/:id', getUserById);

@@ -153,6 +153,69 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Create new user (admin only)
+const createUser = async (req, res) => {
+  try {
+    const { full_name, username, password, role } = req.body;
+    
+    // Validate required fields
+    if (!full_name || !username || !password || !role) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    let pool = await sql.connect(dbConfig);
+    
+    // Check if username already exists
+    const existingUser = await pool.request()
+      .input('username', sql.VarChar, username)
+      .query('SELECT id_user FROM users WHERE username = @username');
+    
+    if (existingUser.recordset.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username already exists'
+      });
+    }
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(12);
+    const password_hash = await bcrypt.hash(password, salt);
+    
+    // Insert new user
+    const result = await pool.request()
+      .input('full_name', sql.VarChar, full_name)
+      .input('username', sql.VarChar, username)
+      .input('password_hash', sql.VarChar, password_hash)
+      .input('role', sql.VarChar, role)
+      .query(`
+        INSERT INTO users (username, password_hash, full_name, role, is_active)
+        VALUES (@username, @password_hash, @full_name, @role, 1);
+        SELECT SCOPE_IDENTITY() AS id;
+      `);
+    
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: {
+        id: result.recordset[0].id,
+        username,
+        full_name,
+        role
+      }
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create user',
+      error: error.message
+    });
+  }
+};
+
 // Update user (admin only)
 const updateUser = async (req, res) => {
   try {
@@ -262,9 +325,10 @@ const updateProfilePhoto = async (req, res) => {
 module.exports = {
   getUsers,
   getUserById,
+  createUser,
   getProfile,
   updateProfile,
   updateUser,
   deleteUser,
-  updateProfilePhoto  // TAMBAH INI!
+  updateProfilePhoto
 };

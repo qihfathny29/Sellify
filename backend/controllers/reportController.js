@@ -4,7 +4,7 @@ const dbConfig = require('../config/db');
 // Get dashboard statistics
 const getDashboardStats = async (req, res) => {
   try {
-    const { period = 'today' } = req.query; // today, week, month, year
+    const { period = 'all' } = req.query; // all, today, week, month, year - UBAH default jadi 'all'
     
     let dateFilter = '';
     
@@ -18,6 +18,7 @@ const getDashboardStats = async (req, res) => {
     } else if (period === 'year') {
       dateFilter = `AND YEAR(t.created_at) = YEAR(GETDATE())`;
     }
+    // If period === 'all', dateFilter stays empty = show all data
     
     let pool = await sql.connect(dbConfig);
     
@@ -102,7 +103,7 @@ const getRevenueTrend = async (req, res) => {
 // Get sales by category
 const getSalesByCategory = async (req, res) => {
   try {
-    const { period = 'today' } = req.query;
+    const { period = 'all' } = req.query; // UBAH default jadi 'all'
     
     let pool = await sql.connect(dbConfig);
     let dateFilter = '';
@@ -114,6 +115,7 @@ const getSalesByCategory = async (req, res) => {
     } else if (period === 'month') {
       dateFilter = `AND t.created_at >= DATEADD(day, -30, GETDATE())`;
     }
+    // If period === 'all', dateFilter stays empty
     
     // JOIN with categories table
     const result = await pool.request().query(`
@@ -150,7 +152,7 @@ const getSalesByCategory = async (req, res) => {
 // Get top products
 const getTopProducts = async (req, res) => {
   try {
-    const { period = 'today', limit = 5 } = req.query;
+    const { period = 'all', limit = 5 } = req.query; // UBAH default jadi 'all'
     
     let pool = await sql.connect(dbConfig);
     let dateFilter = '';
@@ -162,6 +164,7 @@ const getTopProducts = async (req, res) => {
     } else if (period === 'month') {
       dateFilter = `AND t.created_at >= DATEADD(day, -30, GETDATE())`;
     }
+    // If period === 'all', dateFilter stays empty
     
     const result = await pool.request()
       .input('limit', sql.Int, limit)
