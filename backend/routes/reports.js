@@ -6,11 +6,11 @@ const {
   getSalesByCategory,
   getTopProducts
 } = require('../controllers/reportController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/roleMiddleware');
 
 // All routes require admin authentication
-router.use(authMiddleware, admin);
+router.use(protect, admin);
 
 // Dashboard stats
 router.get('/dashboard-stats', getDashboardStats);

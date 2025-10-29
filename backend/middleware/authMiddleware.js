@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = (req, res, next) => {
+// Protect routes - require authentication
+const protect = (req, res, next) => {
     try {
         const authHeader = req.header('Authorization');
         console.log('Auth header:', authHeader); // Debug log
@@ -18,7 +19,12 @@ const authMiddleware = (req, res, next) => {
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Decoded user:', decoded); // Debug log
-        req.user = decoded; // Set user info to request
+        // Normalize token payload so controllers can rely on req.user.id
+        req.user = {
+            id: decoded.userId || decoded.id || decoded.user_id,
+            username: decoded.username,
+            role: decoded.role
+        };
         next();
     } catch (error) {
         console.error('Auth middleware error:', error);
@@ -29,4 +35,16 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-module.exports = authMiddleware;
+// Admin only - require admin role
+const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({
+            success: false,
+            error: 'Access denied. Admin only.'
+        });
+    }
+};
+
+module.exports = { protect, adminOnly };

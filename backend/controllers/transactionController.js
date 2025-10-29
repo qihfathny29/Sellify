@@ -1,89 +1,183 @@
 const sql = require('mssql');
-const dbConfig = require('../config/db');
+const db = require('../config/db');
 
-// Create new transaction
-const createTransaction = async (req, res) => {
+// Get all transactions
+exports.getAllTransactions = async (req, res) => {
   try {
-    const {
-      items,
-      subtotal,
-      tax,
-      total,
-      payment_method,
-      amount_paid,
-      change_amount
+    const pool = await sql.connect(db);
+    
+    const query = `
+      SELECT 
+        id,
+        transaction_code,
+        total_amount,
+        payment_method,
+        payment_amount,
+        change_amount,
+        status,
+        created_at,
+        subtotal,
+        tax
+      FROM transactions
+      ORDER BY created_at DESC
+    `;
+
+    const result = await pool.request().query(query);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error('Get transactions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch transactions',
+      error: error.message
+    });
+  }
+};
+
+// Create transaction
+exports.createTransaction = async (req, res) => {
+  try {
+    const { 
+      items, 
+      payment_method, 
+      amount_paid, 
+      payment_amount, 
+      customer_name, 
+      subtotal: clientSubtotal, 
+      tax: clientTax, 
+      total: clientTotal, 
+      change_amount: clientChange 
     } = req.body;
-    
-    console.log('Creating transaction:', { items, total, payment_method });
-    console.log('User from middleware:', req.user); // Debug log
-    
-    if (!req.user || (!req.user.id && !req.user.userId)) {
+
+    console.log('🔍 Transaction request body:', req.body);
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Items are required'
+      });
+    }
+
+    const pool = await sql.connect(db);
+
+    // Use client calculations or calculate server-side
+    let subtotal = clientSubtotal || 0;
+    let tax = clientTax || 0;
+    let total = clientTotal || 0;
+    let item_count = 0;
+
+    // If client didn't send calculations, calculate server-side
+    if (!clientSubtotal) {
+      for (const item of items) {
+        subtotal += item.price * item.quantity;
+        item_count += item.quantity;
+      }
+      tax = subtotal * 0.1; // 10% tax
+      total = subtotal + tax;
+    }
+
+    // Use amount_paid or payment_amount
+    const paidAmount = amount_paid || payment_amount || 0;
+    const change = clientChange || (paidAmount - total);
+
+    if (change < 0 && payment_method === 'cash') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment amount is insufficient'
+      });
+    }
+
+    // Generate transaction code
+    const transaction_code = 'TRX' + Date.now();
+
+    // Insert transaction
+    const transactionQuery = `
+      INSERT INTO transactions 
+      (transaction_code, user_id, subtotal, tax, total_amount, payment_method, payment_amount, change_amount, status, created_at)
+      OUTPUT INSERTED.id
+      VALUES (@transaction_code, @user_id, @subtotal, @tax, @total_amount, @payment_method, @payment_amount, @change_amount, @status, GETDATE())
+    `;
+
+    const transactionRequest = pool.request();
+    transactionRequest.input('transaction_code', sql.NVarChar, transaction_code);
+    // Get user_id from auth middleware
+    const userId = req.user?.id;
+    if (!userId) {
       return res.status(401).json({
         success: false,
         message: 'User not authenticated'
       });
     }
-    
-    const user_id = req.user.id || req.user.userId; // Support both formats
-    const transaction_code = `TRX-${Date.now()}`;
-    
-    console.log('Using user_id:', user_id); // Debug log
-    
-    let pool = await sql.connect(dbConfig);
-    
-    // Insert to transactions table
-    const transactionResult = await pool.request()
-      .input('transaction_code', sql.NVarChar, transaction_code)
-      .input('user_id', sql.Int, user_id)
-      .input('total', sql.Decimal, total)
-      .input('payment_method', sql.NVarChar, payment_method)
-      .input('amount_paid', sql.Decimal, amount_paid)
-      .input('change_amount', sql.Decimal, change_amount)
-      .query(`
-        INSERT INTO transactions (transaction_code, user_id, total_amount, payment_method, payment_amount, change_amount, status, created_at)
-        OUTPUT INSERTED.id
-        VALUES (@transaction_code, @user_id, @total, @payment_method, @amount_paid, @change_amount, 'completed', GETDATE())
-      `);
-    
+    transactionRequest.input('user_id', sql.Int, userId);
+    transactionRequest.input('subtotal', sql.Decimal(10, 2), subtotal);
+    transactionRequest.input('tax', sql.Decimal(10, 2), tax);
+    transactionRequest.input('total_amount', sql.Decimal(10, 2), total);
+    transactionRequest.input('payment_method', sql.NVarChar, payment_method);
+    transactionRequest.input('payment_amount', sql.Decimal(10, 2), paidAmount);
+    transactionRequest.input('change_amount', sql.Decimal(10, 2), change);
+    transactionRequest.input('status', sql.NVarChar, 'completed');
+
+    const transactionResult = await transactionRequest.query(transactionQuery);
     const transaction_id = transactionResult.recordset[0].id;
-    
-    // Insert transaction items
+
+    // Insert transaction items and update stock
     for (const item of items) {
-      await pool.request()
-        .input('transaction_id', sql.Int, transaction_id)
-        .input('product_id', sql.Int, item.id)
-        .input('product_name', sql.NVarChar, item.name)
-        .input('quantity', sql.Int, item.quantity)
-        .input('unit_price', sql.Decimal, item.price)
-        .input('total_price', sql.Decimal, item.quantity * item.price)
-        .query(`
-          INSERT INTO transaction_items (transaction_id, product_id, product_name, quantity, unit_price, total_price, created_at)
-          VALUES (@transaction_id, @product_id, @product_name, @quantity, @unit_price, @total_price, GETDATE())
-        `);
-      
-      // Update product stock
-      await pool.request()
-        .input('quantity', sql.Int, item.quantity)
-        .input('product_id', sql.Int, item.id)
-        .query(`
-          UPDATE products SET stock = stock - @quantity WHERE id = @product_id
-        `);
+      // Insert item
+      const itemQuery = `
+        INSERT INTO transaction_items 
+        (transaction_id, product_id, product_name, quantity, unit_price, total_price)
+        VALUES (@transaction_id, @product_id, @product_name, @quantity, @unit_price, @total_price)
+      `;
+
+      const itemRequest = pool.request();
+      itemRequest.input('transaction_id', sql.Int, transaction_id);
+      // Handle both id and product_id fields
+      const productId = item.product_id || item.id;
+      itemRequest.input('product_id', sql.Int, productId);
+      itemRequest.input('product_name', sql.NVarChar, item.name);
+      itemRequest.input('quantity', sql.Int, item.quantity);
+      itemRequest.input('unit_price', sql.Decimal(10, 2), item.price);
+      itemRequest.input('total_price', sql.Decimal(10, 2), item.price * item.quantity);
+
+      await itemRequest.query(itemQuery);
+
+      // Update stock
+      const stockQuery = `
+        UPDATE products 
+        SET stock = stock - @quantity 
+        WHERE id = @product_id
+      `;
+
+      const stockRequest = pool.request();
+      stockRequest.input('quantity', sql.Int, item.quantity);
+      stockRequest.input('product_id', sql.Int, productId);
+
+      await stockRequest.query(stockQuery);
     }
-    
-    await pool.close();
-    
-    res.json({
+
+    res.status(201).json({
       success: true,
       message: 'Transaction created successfully',
       data: {
         id: transaction_id,
+        transaction_id,
         transaction_code,
-        total
+        total,
+        change,
+        subtotal,
+        tax,
+        payment_method,
+        payment_amount: paidAmount,
+        change_amount: change
       }
     });
-    
+
   } catch (error) {
-    console.error('Transaction error:', error);
+    console.error('Create transaction error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create transaction',
@@ -92,217 +186,176 @@ const createTransaction = async (req, res) => {
   }
 };
 
-// Get user transactions
-const getUserTransactions = async (req, res) => {
-  try {
-    const user_id = req.user.id || req.user.userId; // Support both formats
-    
-    console.log('Getting transactions for user:', user_id); // Debug log
-    console.log('Full user object:', req.user); // Debug log
-    
-    let pool = await sql.connect(dbConfig);
-    const result = await pool.request()
-      .input('user_id', sql.Int, user_id)
-      .query(`
-        SELECT 
-          t.id,
-          t.transaction_code,
-          t.total_amount,
-          t.payment_method,
-          t.payment_amount,
-          t.change_amount,
-          t.status,
-          t.created_at,
-          ISNULL(SUM(ti.quantity), 0) as item_count
-        FROM transactions t
-        LEFT JOIN transaction_items ti ON t.id = ti.transaction_id
-        WHERE t.user_id = @user_id
-        GROUP BY t.id, t.transaction_code, t.total_amount, t.payment_method, t.payment_amount, t.change_amount, t.status, t.created_at
-        ORDER BY t.created_at DESC
-      `);
-    
-    console.log('Found transactions:', result.recordset.length); // Debug log
-    
-    await pool.close();
-    
-    res.json({
-      success: true,
-      data: result.recordset
-    });
-    
-  } catch (error) {
-    console.error('Get transactions error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get transactions'
-    });
-  }
-};
-
-// Get transaction detail
-const getTransactionDetail = async (req, res) => {
+// Get transaction by ID with items
+exports.getTransactionById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    let pool = await sql.connect(dbConfig);
-    
-    // Get transaction
-    const transactionResult = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`
-        SELECT * FROM transactions WHERE id = @id
-      `);
-    
+
+    console.log('🔍 Fetching transaction:', id);
+
+    const pool = await sql.connect(db);
+
+    // Get transaction detail
+    const transactionQuery = `
+      SELECT 
+        id,
+        transaction_code,
+        total_amount,
+        payment_method,
+        payment_amount,
+        change_amount,
+        status,
+        created_at,
+        subtotal,
+        tax
+      FROM transactions
+      WHERE id = @id
+    `;
+
+    const transactionRequest = pool.request();
+    transactionRequest.input('id', sql.Int, id);
+    const transactionResult = await transactionRequest.query(transactionQuery);
+
     if (transactionResult.recordset.length === 0) {
-      await pool.close();
       return res.status(404).json({
         success: false,
         message: 'Transaction not found'
       });
     }
-    
-    // Get transaction items
-    const itemsResult = await pool.request()
-      .input('transaction_id', sql.Int, id)
-      .query(`
-        SELECT 
-          ti.*,
-          p.name as current_product_name,
-          p.image_url
-        FROM transaction_items ti
-        LEFT JOIN products p ON ti.product_id = p.id
-        WHERE ti.transaction_id = @transaction_id
-        ORDER BY ti.id
-      `);
-    
-    await pool.close();
-    
+
     const transaction = transactionResult.recordset[0];
-    transaction.items = itemsResult.recordset;
-    
+    console.log('✅ Transaction found:', transaction.id);
+
+    // Get transaction items
+    const itemsQuery = `
+      SELECT 
+        ti.id,
+        ti.product_id,
+        ti.product_name,
+        ti.quantity,
+        ti.unit_price as price,
+        ti.total_price as subtotal,
+        p.name as current_product_name,
+        c.name as category_name
+      FROM transaction_items ti
+      LEFT JOIN products p ON ti.product_id = p.id
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE ti.transaction_id = @transaction_id
+    `;
+
+    const itemsRequest = pool.request();
+    itemsRequest.input('transaction_id', sql.Int, id);
+    const itemsResult = await itemsRequest.query(itemsQuery);
+
+    console.log('✅ Found items:', itemsResult.recordset.length);
+
+    const items = itemsResult.recordset.map(item => ({
+      id: item.id,
+      product_id: item.product_id,
+      product_name: item.current_product_name || item.product_name || 'Unknown Product',
+      category_name: item.category_name || 'Uncategorized',
+      quantity: item.quantity || 0,
+      price: parseFloat(item.price) || 0,
+      subtotal: parseFloat(item.subtotal) || (parseFloat(item.price) * item.quantity) || 0
+    }));
+
     res.json({
       success: true,
-      data: transaction
+      data: {
+        ...transaction,
+        items: items
+      }
     });
-    
+
   } catch (error) {
-    console.error('Get transaction detail error:', error);
+    console.error('❌ Get transaction by ID error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get transaction detail'
+      message: 'Failed to fetch transaction',
+      error: error.message
     });
   }
 };
 
-// Get ALL transactions (for Admin) - TAMBAHKAN INI!
-const getAllTransactions = async (req, res) => {
+exports.getUserTransactions = async (req, res) => {
   try {
-    const { startDate, endDate, cashier_id, status, search } = req.query;
+    const userId = req.user?.id;
     
-    let pool = await sql.connect(dbConfig);
-    let query = `
+    console.log('🔍 Getting transactions for user:', userId);
+    
+    // Pastikan userId ada
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+    
+    const pool = await sql.connect(db);
+    
+    // Get transactions with item count - HANYA untuk user yang login
+    const query = `
       SELECT 
         t.id,
         t.transaction_code,
+        t.user_id,
         t.total_amount,
         t.payment_method,
         t.payment_amount,
         t.change_amount,
         t.status,
         t.created_at,
-        u.username,
-        u.full_name as cashier_name,
-        ISNULL(SUM(ti.quantity), 0) as item_count
+        t.subtotal,
+        t.tax,
+        COUNT(ti.id) as item_count
       FROM transactions t
-      LEFT JOIN users u ON t.user_id = u.id_user
       LEFT JOIN transaction_items ti ON t.id = ti.transaction_id
-      WHERE 1=1
+      WHERE t.user_id = @userId
+      GROUP BY t.id, t.transaction_code, t.user_id, t.total_amount, t.payment_method, 
+               t.payment_amount, t.change_amount, t.status, t.created_at, t.subtotal, t.tax
+      ORDER BY t.created_at DESC
     `;
-    
+
     const request = pool.request();
-    
-    // Filter by date range
-    if (startDate && endDate) {
-      query += ` AND CAST(t.created_at AS DATE) BETWEEN @startDate AND @endDate`;
-      request.input('startDate', sql.Date, startDate);
-      request.input('endDate', sql.Date, endDate);
-    }
-    
-    // Filter by cashier
-    if (cashier_id && cashier_id !== 'all') {
-      query += ` AND t.user_id = @cashier_id`;
-      request.input('cashier_id', sql.Int, cashier_id);
-    }
-    
-    // Filter by status
-    if (status && status !== 'all') {
-      query += ` AND t.status = @status`;
-      request.input('status', sql.NVarChar, status);
-    }
-    
-    // Search by transaction code or cashier name
-    if (search) {
-      query += ` AND (t.transaction_code LIKE @search OR u.full_name LIKE @search OR u.username LIKE @search)`;
-      request.input('search', sql.NVarChar, `%${search}%`);
-    }
-    
-    query += ` GROUP BY t.id, t.transaction_code, t.total_amount, t.payment_method, t.payment_amount, t.change_amount, t.status, t.created_at, u.username, u.full_name`;
-    query += ` ORDER BY t.created_at DESC`;
+    request.input('userId', sql.Int, userId);
     
     const result = await request.query(query);
-    await pool.close();
-    
+
+    console.log('🔍 Found transactions for user', userId, ':', result.recordset.length);
+
     res.json({
       success: true,
       data: result.recordset
     });
-    
   } catch (error) {
-    console.error('Get all transactions error:', error);
+    console.error('Get user transactions error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get transactions',
+      message: 'Failed to fetch user transactions',
       error: error.message
     });
   }
 };
 
-// Get all cashiers (for filter) - TAMBAHKAN INI JUGA!
-const getAllCashiers = async (req, res) => {
+exports.getTransactionDetail = async (req, res) => {
+  return exports.getTransactionById(req, res);
+};
+
+exports.getAllCashiers = async (req, res) => {
   try {
-    let pool = await sql.connect(dbConfig);
-    const result = await pool.request()
-      .query(`
-        SELECT DISTINCT 
-          u.id_user,
-          u.username,
-          u.full_name
-        FROM users u
-        INNER JOIN transactions t ON u.id_user = t.user_id
-        WHERE u.is_active = 1
-        ORDER BY u.full_name
-      `);
-    
-    await pool.close();
+    const pool = await sql.connect(db);
+    const query = `SELECT user_id as id, name, username FROM users WHERE role = 'cashier'`;
+    const result = await pool.request().query(query);
     
     res.json({
       success: true,
       data: result.recordset
     });
-    
   } catch (error) {
     console.error('Get cashiers error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get cashiers'
+      message: 'Failed to fetch cashiers'
     });
   }
-};
-
-module.exports = {
-  createTransaction,
-  getUserTransactions,
-  getTransactionDetail,
-  getAllTransactions,     // Export baru
-  getAllCashiers          // Export baru
 };

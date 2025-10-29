@@ -12,7 +12,7 @@ const {
   updateProfile,
   updateProfilePhoto 
 } = require('../controllers/userController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/roleMiddleware');
 
 // Configure multer for profile photo upload
@@ -43,12 +43,12 @@ const upload = multer({
 });
 
 // Profile routes (untuk semua user yang login)
-router.get('/profile', authMiddleware, getProfile);
-router.put('/profile', authMiddleware, updateProfile);
-router.post('/profile/photo', authMiddleware, upload.single('photo'), updateProfilePhoto); // Tambah ini
+router.get('/profile', protect, getProfile);
+router.put('/profile', protect, updateProfile);
+router.post('/profile/photo', protect, upload.single('photo'), updateProfilePhoto); // Tambah ini
 
 // All other routes require authentication
-router.use(authMiddleware);
+router.use(protect);
 
 // Test route
 router.get('/test', (req, res) => {

@@ -8,8 +8,25 @@ const fs = require('fs');
 const getUsers = async (req, res) => {
   try {
     let pool = await sql.connect(dbConfig);
+    
+    // Get users with transaction performance data
     const result = await pool.request()
-      .query('SELECT id_user, username, full_name, role, is_active, created_at FROM users ORDER BY created_at DESC');
+      .query(`
+        SELECT 
+          u.id_user, 
+          u.username, 
+          u.full_name, 
+          u.role, 
+          u.is_active, 
+          u.created_at,
+          COALESCE(COUNT(t.id), 0) as totalTransactions,
+          COALESCE(SUM(t.total_amount), 0) as totalRevenue,
+          MAX(t.created_at) as lastTransaction
+        FROM users u
+        LEFT JOIN transactions t ON u.id_user = t.user_id AND t.status = 'completed'
+        GROUP BY u.id_user, u.username, u.full_name, u.role, u.is_active, u.created_at
+        ORDER BY u.created_at DESC
+      `);
     
     res.json({
       success: true,
