@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../api/axios';
+import { FaStore, FaCreditCard, FaFileInvoice, FaBell, FaCog, FaSave, FaMoneyBillWave, FaMobileAlt, FaUniversity, FaMobile, FaEnvelope, FaChartBar, FaChartLine } from 'react-icons/fa';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('store');
@@ -61,11 +62,11 @@ const Settings = () => {
   };
 
   const tabs = [
-    { id: 'store', label: ' Store Info', icon: '🏪' },
-    { id: 'payment', label: ' Payment', icon: '💳' },
-    { id: 'receipt', label: ' Receipt', icon: '🧾' },
-    { id: 'notifications', label: ' Notifications', icon: '🔔' },
-    { id: 'system', label: ' System', icon: '⚙️' }
+    { id: 'store', label: ' Store Info', icon: <FaStore className="mr-2" /> },
+    { id: 'payment', label: ' Payment', icon: <FaCreditCard className="mr-2" /> },
+    { id: 'receipt', label: ' Receipt', icon: <FaFileInvoice className="mr-2" /> },
+    { id: 'notifications', label: ' Notifications', icon: <FaBell className="mr-2" /> },
+    { id: 'system', label: ' System', icon: <FaCog className="mr-2" /> }
   ];
 
   return (
@@ -73,7 +74,9 @@ const Settings = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>⚙️ Settings</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+            <FaCog className="inline-block" /> Settings
+          </h1>
           <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
             Configure your store settings and preferences
           </p>
@@ -97,7 +100,7 @@ const Settings = () => {
                   borderColor: activeTab === tab.id ? '#2C3E50' : 'transparent'
                 }}
               >
-                <span className="mr-2">{tab.icon}</span>
+                {tab.icon}
                 {tab.label}
               </button>
             ))}
@@ -110,8 +113,8 @@ const Settings = () => {
           {/* Store Info Tab */}
           {activeTab === 'store' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>
-                🏪 Store Information
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaStore /> Store Information
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -211,7 +214,7 @@ const Settings = () => {
                   color: '#FFFFFF'
                 }}
               >
-                {loading ? 'Saving...' : '💾 Save Store Info'}
+                {loading ? 'Saving...' : <><FaSave className="inline-block mr-2" /> Save Store Info</>}
               </button>
             </div>
           )}
@@ -219,8 +222,8 @@ const Settings = () => {
           {/* Payment Methods Tab */}
           {activeTab === 'payment' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>
-                💳 Payment Methods
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaCreditCard /> Payment Methods
               </h2>
               
               <div className="space-y-4">
@@ -228,11 +231,11 @@ const Settings = () => {
                   <div key={key} className="flex items-center justify-between p-4 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
                     <div className="flex items-center">
                       <span className="mr-3 text-2xl">
-                        {key === 'cash' && '💵'}
-                        {key === 'qris' && '📱'}
-                        {key === 'bankTransfer' && '🏦'}
-                        {key === 'debitCard' && '💳'}
-                        {key === 'ewallet' && '📲'}
+                        {key === 'cash' && <FaMoneyBillWave />}
+                        {key === 'qris' && <FaMobileAlt />}
+                        {key === 'bankTransfer' && <FaUniversity />}
+                        {key === 'debitCard' && <FaCreditCard />}
+                        {key === 'ewallet' && <FaMobile />}
                       </span>
                       <div>
                         <p className="font-medium" style={{ color: '#2C3E50' }}>
@@ -269,7 +272,7 @@ const Settings = () => {
                   color: '#FFFFFF'
                 }}
               >
-                {loading ? 'Saving...' : '💾 Save Payment Settings'}
+                {loading ? 'Saving...' : <><FaSave className="inline-block mr-2" /> Save Payment Settings</>}
               </button>
             </div>
           )}
@@ -277,8 +280,8 @@ const Settings = () => {
           {/* Receipt Settings Tab */}
           {activeTab === 'receipt' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>
-                🧾 Receipt Settings
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaFileInvoice /> Receipt Settings
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -393,7 +396,7 @@ const Settings = () => {
                   color: '#FFFFFF'
                 }}
               >
-                {loading ? 'Saving...' : '💾 Save Receipt Settings'}
+                {loading ? 'Saving...' : <><FaSave className="inline-block mr-2" /> Save Receipt Settings</>}
               </button>
             </div>
           )}
@@ -401,8 +404,8 @@ const Settings = () => {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>
-                🔔 Notification Settings
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaBell /> Notification Settings
               </h2>
               
               <div className="space-y-4">
@@ -410,11 +413,11 @@ const Settings = () => {
                   <div key={key} className="flex items-center justify-between p-4 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
                     <div>
                       <p className="font-medium" style={{ color: '#2C3E50' }}>
-                        {key === 'emailLowStock' && '📧 Email Low Stock Alerts'}
-                        {key === 'whatsappNotifications' && '📱 WhatsApp Notifications'}
-                        {key === 'smsAlerts' && '📱 SMS Alerts'}
-                        {key === 'dailyReport' && '📊 Daily Sales Report'}
-                        {key === 'weeklyReport' && '📈 Weekly Summary Report'}
+                        {key === 'emailLowStock' && <><FaEnvelope className="inline-block mr-1" /> Email Low Stock Alerts</>}
+                        {key === 'whatsappNotifications' && <><FaMobileAlt className="inline-block mr-1" /> WhatsApp Notifications</>}
+                        {key === 'smsAlerts' && <><FaMobileAlt className="inline-block mr-1" /> SMS Alerts</>}
+                        {key === 'dailyReport' && <><FaChartBar className="inline-block mr-1" /> Daily Sales Report</>}
+                        {key === 'weeklyReport' && <><FaChartLine className="inline-block mr-1" /> Weekly Summary Report</>}
                       </p>
                       <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
                         {key === 'emailLowStock' && 'Get notified when products are low in stock'}
@@ -446,7 +449,7 @@ const Settings = () => {
                   color: '#FFFFFF'
                 }}
               >
-                {loading ? 'Saving...' : '💾 Save Notification Settings'}
+                {loading ? 'Saving...' : <><FaSave className="inline-block mr-2" /> Save Notification Settings</>}
               </button>
             </div>
           )}
@@ -454,8 +457,8 @@ const Settings = () => {
           {/* System Settings Tab */}
           {activeTab === 'system' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>
-                ⚙️ System Settings
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaCog /> System Settings
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -561,7 +564,7 @@ const Settings = () => {
                   color: '#FFFFFF'
                 }}
               >
-                {loading ? 'Saving...' : '💾 Save System Settings'}
+                {loading ? 'Saving...' : <><FaSave className="inline-block mr-2" /> Save System Settings</>}
               </button>
             </div>
           )}

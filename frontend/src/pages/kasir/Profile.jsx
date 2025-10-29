@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import KasirLayout from '../../components/kasir/KasirLayout';
+import { FaUser, FaCamera, FaTag, FaCheck, FaTimes, FaSave, FaEdit } from 'react-icons/fa';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -176,8 +177,8 @@ const Profile = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#2C3E50' }}>
-              👤 Profil Saya
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+              <FaUser /> Profil Saya
             </h1>
             <p className="opacity-70" style={{ color: '#2C3E50' }}>
               Kelola informasi profil dan keamanan akun Anda
@@ -216,12 +217,12 @@ const Profile = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span>👤</span>
+                        <FaUser />
                       )}
                       
                       {/* Overlay on hover */}
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-white text-sm">📷 Ubah Foto</span>
+                        <span className="text-white text-sm flex items-center gap-1"><FaCamera /> Ubah Foto</span>
                       </div>
                       
                       {/* Loading overlay */}
@@ -238,7 +239,7 @@ const Profile = () => {
                       className="absolute bottom-3 right-1/2 transform translate-x-10 w-8 h-8 rounded-full flex items-center justify-center shadow-lg"
                       style={{ backgroundColor: '#E76F51', color: 'white' }}
                     >
-                      📷
+                      <FaCamera />
                     </button>
                   </div>
 
@@ -258,18 +259,18 @@ const Profile = () => {
                     @{user?.username}
                   </p>
                   <span 
-                    className="inline-block px-3 py-1 rounded-full text-sm font-medium"
+                    className="inline-block px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1"
                     style={{ backgroundColor: '#E76F51', color: 'white' }}
                   >
-                    🏷️ {user?.role === 'kasir' ? 'Kasir' : user?.role === 'admin' ? 'Admin' : 'User'}
+                    <FaTag /> {user?.role === 'kasir' ? 'Kasir' : user?.role === 'admin' ? 'Admin' : 'User'}
                   </span>
 
                   <div className="mt-6 pt-6 border-t" style={{ borderColor: '#2C3E50' }}>
                     <div className="text-left space-y-3">
                       <div>
                         <p className="text-xs opacity-70" style={{ color: '#2C3E50' }}>Status Akun</p>
-                        <p className="font-medium" style={{ color: '#2C3E50' }}>
-                          {user?.is_active ? '✅ Aktif' : '❌ Tidak Aktif'}
+                        <p className="font-medium flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                          {user?.is_active ? <FaCheck className="text-green-600" /> : <FaTimes className="text-red-600" />} {user?.is_active ? 'Aktif' : 'Tidak Aktif'}
                         </p>
                       </div>
                       <div>
@@ -291,8 +292,8 @@ const Profile = () => {
             {/* Edit Form */}
             <div className="lg:col-span-2">
               <div className="rounded-2xl shadow-lg p-6" style={{ backgroundColor: 'white' }}>
-                <h2 className="text-xl font-bold mb-6" style={{ color: '#2C3E50' }}>
-                  ✏️ Edit Profil
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                  <FaEdit /> Edit Profil
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -409,25 +410,25 @@ const Profile = () => {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 hover:opacity-90"
+                      className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 hover:opacity-90 flex items-center gap-2"
                       style={{ 
                         backgroundColor: '#E76F51',
                         color: 'white'
                       }}
                     >
-                      {saving ? '💾 Menyimpan...' : '💾 Simpan Perubahan'}
+                      {saving ? <><FaSave /> Menyimpan...</> : <><FaSave /> Simpan Perubahan</>}
                     </button>
                     
                     <button
                       type="button"
                       onClick={() => navigate('/kasir/dashboard')}
-                      className="px-6 py-3 rounded-lg font-semibold transition-all hover:opacity-90"
+                      className="px-6 py-3 rounded-lg font-semibold transition-all hover:opacity-90 flex items-center gap-2"
                       style={{ 
                         backgroundColor: '#2C3E50',
                         color: '#FFFFFF'
                       }}
                     >
-                      ❌ Batal
+                      <FaTimes /> Batal
                     </button>
                   </div>
                 </form>

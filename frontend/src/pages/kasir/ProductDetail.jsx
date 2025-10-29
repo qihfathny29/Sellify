@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import KasirLayout from '../../components/kasir/KasirLayout';
 import api from '../../api/axios';
+import { FaBox, FaExclamationTriangle, FaCheck, FaTimes, FaClipboard, FaChartBar, FaMoneyBillWave, FaStickyNote, FaArrowLeft } from 'react-icons/fa';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -69,7 +70,7 @@ const ProductDetail = () => {
       <KasirLayout>
         <div className="text-center py-12">
           <div className="rounded-lg p-8" style={{ backgroundColor: '#FFFFFF' }}>
-            <p className="text-6xl mb-4">❌</p>
+            <p className="text-6xl mb-4 flex items-center justify-center"><FaTimes /></p>
             <h2 className="text-2xl font-bold mb-4" style={{ color: '#2C3E50' }}>
               Product Not Found
             </h2>
@@ -78,13 +79,13 @@ const ProductDetail = () => {
             </p>
             <button
               onClick={() => navigate('/kasir/products')}
-              className="px-6 py-3 rounded-md font-medium transition-colors duration-200"
+              className="px-6 py-3 rounded-md font-medium transition-colors duration-200 flex items-center gap-2"
               style={{ 
                 backgroundColor: '#2C3E50',
-                color: '#2C3E50'
+                color: '#FFFFFF'
               }}
             >
-              ← Back to Products
+              <FaBox /> Back to Products
             </button>
           </div>
         </div>
@@ -102,21 +103,20 @@ const ProductDetail = () => {
         <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button
+               <button
                 onClick={() => navigate('/kasir/products')}
-                className="px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center space-x-2 hover:opacity-80"
+                className="px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center gap-2 hover:opacity-80"
                 style={{ 
                   backgroundColor: '#2C3E50',
                   color: '#FFFFFF'
                 }}
               >
-                <span>←</span>
-                <span>Back</span>
+                <FaArrowLeft />
+                Back
               </button>
               <div>
-                <h1 className="text-3xl font-bold flex items-center space-x-2" style={{ color: '#2C3E50' }}>
-                  <span>📦</span>
-                  <span>Product Details</span>
+                <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                  <FaBox /> Product Details
                 </h1>
                 <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
                   Complete information about this product
@@ -125,11 +125,11 @@ const ProductDetail = () => {
             </div>
             <div>
               <span 
-                className={`px-6 py-3 rounded-full text-lg font-bold inline-block ${
+                className={`px-6 py-3 rounded-full text-lg font-bold inline-block flex items-center gap-2 ${
                   product.status === 1 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
                 }`}
               >
-                {product.status === 1 ? '✅ Active' : '❌ Inactive'}
+                {product.status === 1 ? <FaCheck /> : <FaTimes />} {product.status === 1 ? 'Active' : 'Inactive'}
               </span>
             </div>
           </div>
@@ -140,57 +140,60 @@ const ProductDetail = () => {
           {/* Left Column - Image & Barcode */}
           <div className="lg:col-span-1 space-y-6">
             {/* Product Image */}
-            <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4 text-gray-800">
                 Product Image
               </h3>
-              <div className="text-center">
-                {product.image ? (
-                  <div>
+              <div className="relative">
+                {product.image_url ? (
+                  <div className="relative group">
                     <img
-                      src={`http://localhost:5000${product.image}`}
+                      src={`http://localhost:5000${product.image_url}`}
                       alt={product.name}
-                      className="w-full object-cover rounded-lg shadow-lg"
-                      style={{ 
-                        minHeight: '250px', 
-                        maxHeight: '300px',
-                        display: 'block'
-                      }}
+                      className="w-full h-80 object-cover rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         console.log('Image failed to load:', e.target.src);
                         e.target.style.display = 'none';
-                        e.target.parentNode.querySelector('.fallback-icon').style.display = 'flex';
+                        e.target.nextElementSibling.style.display = 'flex';
                       }}
                     />
                     <div 
-                      className="fallback-icon w-full flex items-center justify-center rounded-lg shadow-lg"
-                      style={{ 
-                        backgroundColor: '#F5F5F5',
-                        minHeight: '250px',
-                        display: 'none'
-                      }}
+                      className="w-full h-80 flex items-center justify-center rounded-lg shadow-lg bg-gradient-to-br from-gray-100 to-gray-200"
+                      style={{ display: 'none' }}
                     >
-                      <span className="text-8xl">📦</span>
+                      <div className="text-center">
+                        <FaBox className="text-6xl text-gray-400 mb-3 mx-auto" />
+                        <p className="text-gray-500 font-medium">Image not available</p>
+                        <p className="text-gray-400 text-sm">Default placeholder</p>
+                      </div>
+                    </div>
+                    {/* Image Overlay Info */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <div className="text-white text-center">
+                        <FaBox className="text-2xl mb-2 mx-auto" />
+                        <p className="text-sm font-medium">Product Image</p>
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div 
-                    className="w-full flex items-center justify-center rounded-lg shadow-lg"
-                    style={{ 
-                      backgroundColor: '#F5F5F5',
-                      minHeight: '250px'
-                    }}
-                  >
-                    <span className="text-8xl">📦</span>
+                  <div className="w-full h-80 flex items-center justify-center rounded-lg shadow-lg bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="text-center">
+                      <FaBox className="text-6xl text-gray-400 mb-3 mx-auto" />
+                      <p className="text-gray-500 font-medium">No image available</p>
+                      <p className="text-gray-400 text-sm">Upload image in admin panel</p>
+                    </div>
                   </div>
                 )}
+
+                {/* Image Info */}
+               
               </div>
             </div>
 
             {/* Barcode Section - PERBAIKAN */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📊</span>
+                <FaChartBar className="text-2xl" />
                 <h3 className="text-lg font-semibold" style={{ color: '#2C3E50' }}>Barcode</h3>
               </div>
               
@@ -232,13 +235,13 @@ const ProductDetail = () => {
                     navigator.clipboard.writeText(barcodeNumber);
                     alert('✅ Barcode copied to clipboard: ' + barcodeNumber);
                   }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-80"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-80 flex items-center gap-2"
                   style={{ 
                     backgroundColor: '#2C3E50',
                     color: '#FFFFFF'
                   }}
                 >
-                  📋 Copy Barcode
+                  <FaClipboard /> Copy Barcode
                 </button>
               </div>
             </div>
@@ -274,8 +277,8 @@ const ProductDetail = () => {
 
             {/* Pricing Information */}
             <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-                💰 Pricing Information
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaMoneyBillWave /> Pricing Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
@@ -310,8 +313,8 @@ const ProductDetail = () => {
 
             {/* Stock Information */}
             <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-                📦 Stock Information
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaBox /> Stock Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
@@ -322,7 +325,7 @@ const ProductDetail = () => {
                     {product.stock} units
                   </p>
                   {product.stock <= 10 && (
-                    <p className="text-sm text-red-600 mt-1 font-medium">⚠️ Low Stock Alert!</p>
+                    <p className="text-sm text-red-600 mt-1 font-medium flex items-center gap-1"><FaExclamationTriangle /> Low Stock Alert!</p>
                   )}
                 </div>
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
@@ -338,8 +341,8 @@ const ProductDetail = () => {
 
             {/* Description Section */}
             <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-                📝 Description
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaStickyNote /> Description
               </h3>
               <div className="p-4 rounded-lg" style={{ backgroundColor: '#F5F5F5' }}>
                 <p className="text-lg leading-relaxed" style={{ color: '#2C3E50' }}>

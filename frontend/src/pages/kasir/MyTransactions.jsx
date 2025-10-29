@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import KasirLayout from '../../components/kasir/KasirLayout';
+import { FaFileInvoice, FaPlus, FaSearch, FaCalendarAlt, FaChartBar, FaCheck, FaInbox, FaEye, FaTimes, FaClock } from 'react-icons/fa';
 
 const MyTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -21,7 +22,10 @@ const MyTransactions = () => {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
+      console.log('🔍 Fetching transactions from API...');
       const response = await api.get('/transactions/my-transactions');
+      console.log('🔍 API Response:', response.data);
+      
       if (response.data.success) {
         const transactions = response.data.data.map(transaction => ({
           id: transaction.id,
@@ -34,10 +38,15 @@ const MyTransactions = () => {
           created_at: transaction.created_at,
           item_count: transaction.item_count
         }));
+        console.log('🔍 Mapped transactions:', transactions);
         setTransactions(transactions);
+      } else {
+        console.error('API returned success: false');
+        setTransactions([]);
       }
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
+      console.error('Error details:', error.response?.data);
       setTransactions([]);
     } finally {
       setLoading(false);
@@ -156,10 +165,10 @@ const MyTransactions = () => {
   // Get payment method icon
   const getPaymentMethodIcon = (method) => {
     switch (method?.toLowerCase()) {
-      case 'cash': return '💵';
-      case 'qris': return '📱';
-      case 'transfer': return '🏦';
-      default: return '💳';
+      case 'cash': return <FaCheck className="text-green-600" />;
+      case 'qris': return <FaCalendarAlt className="text-blue-600" />;
+      case 'transfer': return <FaChartBar className="text-purple-600" />;
+      default: return <FaFileInvoice className="text-gray-600" />;
     }
   };
 
@@ -170,17 +179,17 @@ const MyTransactions = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
-              🧾 Transaksi Saya
+            <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+              <FaFileInvoice /> Transaksi Saya
             </h1>
             <p className="text-gray-600 mt-1">Riwayat transaksi yang telah selesai</p>
           </div>
           <button
             onClick={() => navigate('/kasir/pos')}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
+            className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
           >
-            ➕ Transaksi Baru
+            <FaPlus /> Transaksi Baru
           </button>
         </div>
 
@@ -189,8 +198,8 @@ const MyTransactions = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                🔍 Cari Transaksi
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaSearch /> Cari Transaksi
               </label>
               <input
                 type="text"
@@ -204,8 +213,8 @@ const MyTransactions = () => {
 
             {/* Date Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                📅 Filter Periode
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaCalendarAlt /> Filter Periode
               </label>
               <select
                 value={filter}
@@ -222,8 +231,8 @@ const MyTransactions = () => {
 
             {/* Summary */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                📊 Ringkasan
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaChartBar /> Ringkasan
               </label>
               <div className="text-sm" style={{ color: '#2C3E50' }}>
                 <div>Total Transaksi: <span className="font-bold">{filteredTransactions.length}</span></div>
@@ -238,12 +247,12 @@ const MyTransactions = () => {
         {/* Transaction List */}
         {loading ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-4xl mb-4">⏳</div>
+            <div className="text-4xl mb-4 flex items-center justify-center"><FaClock /></div>
             <div className="text-lg font-medium" style={{ color: '#2C3E50' }}>Loading transaksi...</div>
           </div>
         ) : filteredTransactions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-6xl mb-4">📭</div>
+            <div className="text-6xl mb-4 flex items-center justify-center"><FaInbox /></div>
             <div className="text-xl font-medium mb-2" style={{ color: '#2C3E50' }}>
               {searchTerm || filter !== 'all' ? 'Tidak ada transaksi yang sesuai filter' : 'Belum ada transaksi'}
             </div>
@@ -255,10 +264,10 @@ const MyTransactions = () => {
             </p>
             <button
               onClick={() => navigate('/kasir/pos')}
-              className="px-6 py-2 rounded-lg font-medium"
-              style={{ backgroundColor: '#2C3E50', color: '#2C3E50' }}
+              className="px-6 py-2 rounded-lg font-medium flex items-center gap-2"
+              style={{ backgroundColor: '#2C3E50', color: '#ffffff' }}
             >
-              🚀 Mulai Transaksi
+              <FaPlus /> Mulai Transaksi
             </button>
           </div>
         ) : (
@@ -304,16 +313,16 @@ const MyTransactions = () => {
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-medium">
-                          ✅ Selesai
+                          <FaCheck /> Selesai
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => showTransactionDetail(transaction)}
-                          className="px-3 py-1 text-xs rounded-md font-medium transition-colors"
+                          className="px-3 py-1 text-xs rounded-md font-medium transition-colors flex items-center gap-1"
                           style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
                         >
-                          👁️ Detail
+                          <FaEye /> Detail
                         </button>
                       </td>
                     </tr>
@@ -346,14 +355,14 @@ const MyTransactions = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-medium">
-                      ✅ Selesai
+                      <FaCheck /> Selesai
                     </span>
                     <button
                       onClick={() => showTransactionDetail(transaction)}
-                      className="px-3 py-1 text-xs rounded-md font-medium"
-                      style={{ backgroundColor: '#2C3E50', color: '#2C3E50' }}
+                      className="px-3 py-1 text-xs rounded-md font-medium flex items-center gap-1"
+                      style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
                     >
-                      👁️ Detail
+                      <FaEye /> Detail
                     </button>
                   </div>
                 </div>
@@ -367,19 +376,19 @@ const MyTransactions = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="text-lg font-bold" style={{ color: '#2C3E50' }}>📄 Detail Transaksi</h3>
+                <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}><FaFileInvoice /> Detail Transaksi</h3>
                 <button
                   onClick={() => setShowDetailModal(false)}
                   className="text-gray-500 hover:text-gray-700 text-xl"
                 >
-                  ✕
+                  <FaTimes />
                 </button>
               </div>
               
               <div className="p-4">
                 {detailLoading ? (
                   <div className="text-center py-8">
-                    <div className="text-2xl mb-2">⏳</div>
+                    <div className="text-2xl mb-2 flex items-center justify-center"><FaClock /></div>
                     <p style={{ color: '#2C3E50' }}>Memuat detail...</p>
                   </div>
                 ) : (

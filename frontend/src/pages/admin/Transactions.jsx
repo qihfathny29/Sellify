@@ -1,4 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  MagnifyingGlassIcon, 
+  CalendarIcon, 
+  UserIcon, 
+  ChartBarIcon, 
+  CheckCircleIcon, 
+  XCircleIcon, 
+  ArrowPathIcon, 
+  EyeIcon, 
+  PrinterIcon,
+  ClockIcon,
+  ShoppingBagIcon,
+  CreditCardIcon,
+  CurrencyDollarIcon
+} from '@heroicons/react/24/outline';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../api/axios';
 
@@ -99,12 +114,15 @@ const Transactions = () => {
 
     return (
       <span 
-        className="px-2 py-1 rounded-full text-xs font-medium"
+        className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
         style={{ backgroundColor: style.bg, color: style.text }}
       >
-        {status === 'completed' && '✅ Selesai'}
-        {status === 'void' && '❌ Batal'}
-        {status === 'refunded' && '↩️ Refund'}
+        {status === 'completed' && <CheckCircleIcon className="w-3 h-3" />}
+        {status === 'void' && <XCircleIcon className="w-3 h-3" />}
+        {status === 'refunded' && <ArrowPathIcon className="w-3 h-3" />}
+        {status === 'completed' && 'Selesai'}
+        {status === 'void' && 'Batal'}
+        {status === 'refunded' && 'Refund'}
       </span>
     );
   };
@@ -183,7 +201,10 @@ const Transactions = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>💰 Semua Transaksi</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+            <CurrencyDollarIcon className="w-8 h-8" />
+            Semua Transaksi
+          </h1>
           <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
             Monitor dan kelola semua transaksi toko
           </p>
@@ -194,8 +215,9 @@ const Transactions = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                🔍 Cari
+              <label className="block text-sm font-medium mb-2 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <MagnifyingGlassIcon className="w-4 h-4" />
+                Cari
               </label>
               <input
                 type="text"
@@ -213,8 +235,9 @@ const Transactions = () => {
 
             {/* Date Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                📅 Tanggal
+              <label className="block text-sm font-medium mb-2 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <CalendarIcon className="w-4 h-4" />
+                Tanggal
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
@@ -236,8 +259,9 @@ const Transactions = () => {
 
             {/* Kasir Filter - NEW! */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                👤 Kasir
+              <label className="block text-sm font-medium mb-2 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <UserIcon className="w-4 h-4" />
+                Kasir
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
@@ -252,7 +276,7 @@ const Transactions = () => {
                 <option value="all">👥 Semua Kasir</option>
                 {cashiers && cashiers.length > 0 && cashiers.map(cashier => (
                   <option key={cashier.id_user} value={cashier.id_user}>
-                    👤 {cashier.full_name || cashier.username}
+                    {cashier.full_name || cashier.username}
                   </option>
                 ))}
               </select>
@@ -260,8 +284,9 @@ const Transactions = () => {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                📊 Status
+              <label className="block text-sm font-medium mb-2 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <ChartBarIcon className="w-4 h-4" />
+                Status
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
@@ -291,13 +316,14 @@ const Transactions = () => {
                     setDateFilter('today');
                     setStatusFilter('completed');
                   }}
-                  className="flex-1 px-2 py-2 text-xs rounded-md transition-colors duration-200"
+                  className="flex-1 px-2 py-2 text-xs rounded-md transition-colors duration-200 flex items-center gap-1 justify-center"
                   style={{ 
                     backgroundColor: '#2C3E50',
                     color: '#FFFFFF'
                   }}
                 >
-                  📈 Hari Ini
+                  <ChartBarIcon className="w-3 h-3" />
+                  Hari Ini
                 </button>
                 <button
                   onClick={() => {
@@ -306,14 +332,15 @@ const Transactions = () => {
                     setKasirFilter('all');
                     setSearchTerm('');
                   }}
-                  className="flex-1 px-2 py-2 text-xs rounded-md border-2 transition-colors duration-200"
+                  className="flex-1 px-2 py-2 text-xs rounded-md border-2 transition-colors duration-200 flex items-center gap-1 justify-center"
                   style={{ 
                     backgroundColor: 'transparent',
                     color: '#2C3E50',
                     borderColor: '#2C3E50'
                   }}
                 >
-                  🔄 Reset
+                  <ArrowPathIcon className="w-3 h-3" />
+                  Reset
                 </button>
               </div>
             </div>
@@ -418,7 +445,8 @@ const Transactions = () => {
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#34495E', color: '#FFFFFF' }}>
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1" style={{ backgroundColor: '#34495E', color: '#FFFFFF' }}>
+                        <CreditCardIcon className="w-3 h-3" />
                         {transaction.payment_method}
                       </span>
                     </td>
@@ -429,24 +457,26 @@ const Transactions = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleViewDetail(transaction)}
-                          className="px-3 py-1 text-xs rounded-md transition-colors duration-200"
+                          className="px-3 py-1 text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                           style={{ 
                             backgroundColor: '#2C3E50',
                             color: '#FFFFFF'
                           }}
                         >
-                          👁️ Detail
+                          <EyeIcon className="w-3 h-3" />
+                          Detail
                         </button>
                         {transaction.status === 'completed' && (
                           <button
                             onClick={() => handleVoidTransaction(transaction.id)}
-                            className="px-3 py-1 text-xs rounded-md transition-colors duration-200"
+                            className="px-3 py-1 text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                             style={{ 
                               backgroundColor: '#FF5722',
                               color: 'white'
                             }}
                           >
-                            ❌ Batal
+                            <XCircleIcon className="w-3 h-3" />
+                            Batal
                           </button>
                         )}
                       </div>
@@ -473,8 +503,9 @@ const Transactions = () => {
               <div className="p-6">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
-                    🧾 Detail Transaksi
+                  <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <ShoppingBagIcon className="w-6 h-6" />
+                    Detail Transaksi
                   </h2>
                   <button
                     onClick={() => setShowDetailModal(false)}
@@ -488,26 +519,41 @@ const Transactions = () => {
                 {/* Transaction Info */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div>
-                    <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Invoice Number</p>
+                    <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                      <ClockIcon className="w-4 h-4" />
+                      Invoice Number
+                    </p>
                     <p className="font-bold" style={{ color: '#2C3E50' }}>{selectedTransaction.invoiceNumber}</p>
                   </div>
                   <div>
-                    <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Tanggal & Waktu</p>
+                    <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                      <CalendarIcon className="w-4 h-4" />
+                      Tanggal & Waktu
+                    </p>
                     <p style={{ color: '#2C3E50' }}>{selectedTransaction.date} {selectedTransaction.time}</p>
                   </div>
                   <div>
-                    <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Kasir</p>
+                    <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                      <UserIcon className="w-4 h-4" />
+                      Kasir
+                    </p>
                     <p style={{ color: '#2C3E50' }}>{selectedTransaction.kasir}</p>
                   </div>
                   <div>
-                    <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Status</p>
+                    <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                      <ChartBarIcon className="w-4 h-4" />
+                      Status
+                    </p>
                     {getStatusBadge(selectedTransaction.status)}
                   </div>
                 </div>
 
                 {/* Items List */}
                 <div className="mb-6">
-                  <h3 className="font-bold mb-3" style={{ color: '#2C3E50' }}>Barang yang Dibeli</h3>
+                  <h3 className="font-bold mb-3 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <ShoppingBagIcon className="w-5 h-5" />
+                    Barang yang Dibeli
+                  </h3>
                   <div className="space-y-2">
                     {selectedTransaction.items && selectedTransaction.items.length > 0 ? (
                       selectedTransaction.items.map((item, index) => (
@@ -562,20 +608,29 @@ const Transactions = () => {
                   <div className="mt-4 p-3 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Metode Pembayaran</p>
+                        <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                          <CreditCardIcon className="w-4 h-4" />
+                          Metode Pembayaran
+                        </p>
                         <p className="font-medium" style={{ color: '#2C3E50' }}>
                           {selectedTransaction?.paymentMethod || '-'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Jumlah Dibayar</p>
+                        <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                          <CreditCardIcon className="w-4 h-4" />
+                          Jumlah Dibayar
+                        </p>
                         <p className="font-medium" style={{ color: '#2C3E50' }}>
                           Rp {(selectedTransaction?.amountPaid || 0).toLocaleString('id-ID')}
                         </p>
                       </div>
                       {(selectedTransaction?.customerChange || 0) > 0 && (
                         <div className="col-span-2">
-                          <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Kembalian</p>
+                          <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                            <ClockIcon className="w-4 h-4" />
+                            Kembalian
+                          </p>
                           <p className="font-medium" style={{ color: '#2C3E50' }}>
                             Rp {(selectedTransaction?.customerChange || 0).toLocaleString('id-ID')}
                           </p>
@@ -587,7 +642,10 @@ const Transactions = () => {
                   {/* Void Reason */}
                   {selectedTransaction.status === 'void' && selectedTransaction.voidReason && (
                     <div className="mt-4 p-3 rounded-md" style={{ backgroundColor: '#FFE5E5' }}>
-                      <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>Alasan Batal</p>
+                      <p className="text-sm opacity-70 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                        <XCircleIcon className="w-4 h-4" />
+                        Alasan Batal
+                      </p>
                       <p className="font-medium text-red-600">{selectedTransaction.voidReason}</p>
                     </div>
                   )}
@@ -597,13 +655,14 @@ const Transactions = () => {
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2 rounded-md font-medium transition-colors duration-200"
+                    className="px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center gap-2"
                     style={{ 
                       backgroundColor: '#2C3E50',
                       color: '#FFFFFF'
                     }}
                   >
-                    🖨️ Cetak Struk
+                    <PrinterIcon className="w-4 h-4" />
+                    Cetak Struk
                   </button>
                   <button
                     onClick={() => setShowDetailModal(false)}

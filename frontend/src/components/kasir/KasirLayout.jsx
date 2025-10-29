@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoSellify from '../../assets/images/logo-sellify.png';
+import { 
+  FaChartBar, 
+  FaMoneyBillWave, 
+  FaBox, 
+  FaClipboardList, 
+  FaUser, 
+  FaBell, 
+  FaDoorOpen 
+} from 'react-icons/fa';
 
 const KasirLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -12,11 +21,11 @@ const KasirLayout = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const menuItems = [
-    { path: '/kasir/dashboard', icon: '📊', label: 'Dashboard' },
-    { path: '/kasir/pos', icon: '💰', label: 'POS System' },
-    { path: '/kasir/products', icon: '📦', label: 'Products' },
-    { path: '/kasir/transactions', icon: '📋', label: 'Transaksi Saya' },
-    { path: '/kasir/profile', icon: '👤', label: 'Profile' }
+    { path: '/kasir/dashboard', Icon: FaChartBar, label: 'Dashboard' },
+    { path: '/kasir/pos', Icon: FaMoneyBillWave, label: 'POS System' },
+    { path: '/kasir/products', Icon: FaBox, label: 'Products' },
+    { path: '/kasir/transactions', Icon: FaClipboardList, label: 'Transaksi Saya' },
+    { path: '/kasir/profile', Icon: FaUser, label: 'Profile' }
   ];
 
   const handleLogout = () => {
@@ -52,7 +61,7 @@ const KasirLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F5F5' }}>
-      {/* Sidebar - SAMA PERSIS KAYAK ADMIN */}
+      {/* Sidebar - Mirip Admin */}
       <aside 
         className={`fixed top-0 left-0 h-screen shadow-lg transition-all duration-300 z-40 ${
           sidebarCollapsed ? 'w-16' : 'w-64'
@@ -60,7 +69,7 @@ const KasirLayout = ({ children }) => {
         style={{ backgroundColor: '#FFFFFF' }}
       >
         {/* Logo & Toggle */}
-        <div className="p-4 border-b" style={{ borderColor: '#E8E8E8' }}>
+        <div className="p-4 border-b" style={{ borderColor: '#2C3E50' }}>  {/* Ganti ke #2C3E50 biar kontras */}
           <div className="flex items-center justify-between">
             {!sidebarCollapsed ? (
               <>
@@ -96,30 +105,33 @@ const KasirLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <nav className="mt-6 px-2">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`w-full flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
-                  isActive ? 'font-bold shadow-md' : ''
-                }`}
-                style={{
-                  backgroundColor: isActive ? '#2C3E50' : 'transparent',
-                  color: isActive ? '#FFFFFF' : '#2C3E50'
-                }}
-                title={sidebarCollapsed ? item.label : ''}
-              >
-                <span className="text-xl">{item.icon}</span>
-                {!sidebarCollapsed && (
-                  <span className="ml-3">{item.label}</span>
-                )}
-              </button>
-            );
-          })}
+        {/* Menu Items - Mirip Admin */}
+        <nav className="py-6 px-3">  {/* Tambah py-6 buat top/bottom lega */}
+          <ul className="space-y-3">  {/* space-y-3 buat jarak antar item lebar */}
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <li key={item.path}>
+                  <button
+                    onClick={() => navigate(item.path)}
+                    className={`w-full flex items-center px-4 py-4 rounded-xl transition-all duration-200 ${isActive ? 'font-bold border-b-2 border-blue-500' : ''}`}  
+                    style={{
+                      backgroundColor: 'transparent',  // Selalu transparent, no bg
+                      color: isActive ? '#2C3E50' : '#7F8C8D'  // Warna text active gelap, non-active abu
+                    }}
+                    title={sidebarCollapsed ? item.label : ''}
+                  >
+                    <span className="text-xl mr-3 flex-shrink-0">  {/* mr-3 biar jarak icon-text pas */}
+                      <item.Icon style={{ color: isActive ? '#2C3E50' : '#7F8C8D', fontSize: '1.5rem' }} />  {/* Icon ikut warna, size 1.5rem */}
+                    </span>
+                    {!sidebarCollapsed && (
+                      <span className="flex-1 font-semibold text-base">{item.label}</span>  
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
       </aside>
 
@@ -145,9 +157,9 @@ const KasirLayout = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4 relative">
-              {/* Notifications */}
+              {/* Notifications - Ganti emoji ke icon */}
               <button className="relative p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors">
-                <span className="text-xl">🔔</span>
+                <FaBell className="text-xl" style={{ color: '#FFFFFF' }} />
                 <span 
                   className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold"
                   style={{ backgroundColor: '#E74C3C', color: '#FFFFFF' }}
@@ -172,7 +184,7 @@ const KasirLayout = ({ children }) => {
                     className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold"
                     style={{ backgroundColor: '#34495E', color: '#FFFFFF' }}
                   >
-                    👤
+                    <FaUser />  {/* Ganti emoji ke icon */}
                   </div>
                   <div className="text-left">
                     <p className="font-medium">{user.name || 'Kasir'}</p>
@@ -192,7 +204,7 @@ const KasirLayout = ({ children }) => {
                       className="w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors flex items-center"
                       style={{ color: '#2C3E50' }}
                     >
-                      <span className="mr-3">👤</span>
+                      <FaUser className="mr-3 text-lg" style={{ color: '#2C3E50' }} />  {/* Ganti emoji ke icon */}
                       Profile
                     </button>
                     <button
@@ -200,7 +212,7 @@ const KasirLayout = ({ children }) => {
                       className="w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors flex items-center border-t"
                       style={{ color: '#E74C3C', borderColor: '#E8E8E8' }}
                     >
-                      <span className="mr-3">🚪</span>
+                      <FaDoorOpen className="mr-3 text-lg" style={{ color: '#E74C3C' }} />  {/* Ganti emoji ke icon */}
                       Logout
                     </button>
                   </div>

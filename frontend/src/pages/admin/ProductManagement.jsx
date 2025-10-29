@@ -1,932 +1,501 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import api from '../../api/axios';
 import AdminLayout from '../../components/admin/AdminLayout';
-import JsBarcode from 'jsbarcode';
+import ProductForm from '../../components/admin/ProductForm';
+import api from '../../api/axios';
+import { 
+  FaBox, 
+  FaSearch, 
+  FaFolderOpen, 
+  FaCheck, 
+  FaExclamationTriangle, 
+  FaTimes, 
+  FaSyncAlt, 
+  FaTrash, 
+  FaEye, 
+  FaEdit, 
+  FaBarcode 
+} from 'react-icons/fa';
 
 const ProductManagement = () => {
+  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('DESC');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchData();
-    
-    // Check if redirected from dashboard to add product
-    if (searchParams.get('action') === 'add') {
-      setShowAddForm(true);
-    }
-  }, [searchParams]);
-
-  const fetchData = async () => {
+  // Fetch products
+  const fetchProducts = async () => {
     try {
       setLoading(true);
-      
-      // Get products
-      const productsResponse = await api.get('/products');
-      console.log('Products response:', productsResponse.data);  // Debug log
-      setProducts(productsResponse.data.data);
-      
-      // Get categories  
-      const categoriesResponse = await api.get('/products/categories/list');
-      console.log('Categories response:', categoriesResponse.data);
-      setCategories(categoriesResponse.data.data);
-      
+      const response = await api.get('/products', {
+        params: {
+          search: searchTerm,
+          category_id: categoryFilter,
+          stock_status: stockFilter,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+          page: page,
+          limit: 10
+        }
+      });
+
+      if (response.data.success) {
+        setProducts(response.data.data);
+        setPagination(response.data.pagination);
+      }
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      console.error('Failed to fetch products:', error);
+      alert('Gagal mengambil data produk');
     } finally {
       setLoading(false);
     }
   };
 
-  // Add Product Form Component
-  const AddProductForm = () => {
-    const [formData, setFormData] = useState({
-      name: '',
-      category_id: '',
-      price: '',
-      cost: '',
-      stock: '',
-      min_stock: 5,
-      image: null,
-      description: ''
-    });
-    const [imagePreview, setImagePreview] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-
-    const handleImageChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          alert('Please select an image file');
-          return;
-        }
-        
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          alert('File size must be less than 5MB');
-          return;
-        }
-        
-        setFormData({...formData, image: file});
-        
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => setImagePreview(e.target.result);
-        reader.readAsDataURL(file);
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/products/categories');
+      if (response.data.success) {
+        setCategories(response.data.data);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setSubmitting(true);
+  useEffect(() => {
+    fetchProducts();
+  }, [searchTerm, categoryFilter, stockFilter, sortBy, sortOrder, page]);
 
-      try {
-        const stock = parseInt(formData.stock) || 0;
-        const autoMinStock = Math.max(1, Math.floor(stock * 0.1));
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-        const submitData = new FormData();
-        submitData.append('name', formData.name);
-        submitData.append('category_id', parseInt(formData.category_id));
-        submitData.append('price', parseFloat(formData.price));
-        submitData.append('cost', parseFloat(formData.cost) || 0);
-        submitData.append('stock', stock);
-        submitData.append('min_stock', autoMinStock);
-        submitData.append('description', formData.description);
-        
-        if (formData.image) {
-          submitData.append('image', formData.image);
-        }
-        
-        await api.post('/products', submitData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
+  // Load JsBarcode library once on component mount
+  useEffect(() => {
+    // Check if JsBarcode already loaded
+    if (!window.JsBarcode && !document.getElementById('jsbarcode-script')) {
+      const script = document.createElement('script');
+      script.id = 'jsbarcode-script';
+      script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';
+      script.onload = () => {
+        console.log('✅ JsBarcode loaded successfully!');
+      };
+      script.onerror = () => {
+        console.error('❌ Failed to load JsBarcode');
+      };
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Generate barcode when detail modal opens
+  useEffect(() => {
+    if (showDetailModal && selectedProduct && selectedProduct.barcode) {
+      let retryCount = 0;
+      const maxRetries = 20; // Max 2 seconds (20 x 100ms)
+      
+      const generateBarcode = () => {
+        if (window.JsBarcode) {
+          try {
+            const barcodeElement = document.getElementById(`barcode-${selectedProduct.id}`);
+            if (barcodeElement) {
+              console.log('🔄 Generating barcode:', selectedProduct.barcode);
+              window.JsBarcode(barcodeElement, selectedProduct.barcode, {
+                format: 'CODE128',
+                width: 2,
+                height: 60,
+                displayValue: false,
+                margin: 10,
+                background: '#ffffff'
+              });
+              console.log('✅ Barcode generated!');
+            } else {
+              console.warn('⚠️ Canvas element not found, retrying...');
+              if (retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(generateBarcode, 100);
+              }
+            }
+          } catch (error) {
+            console.error('❌ Barcode generation error:', error);
           }
-        });
-        
-        alert(`Product added successfully!\n\nStock: ${stock}\nAuto Min Stock: ${autoMinStock}`);
-        setShowAddForm(false);
-        fetchData();
-        navigate('/admin/products');
-        
-      } catch (error) {
-        alert('Failed to add product: ' + (error.response?.data?.error || error.message));
-      } finally {
-        setSubmitting(false);
-      }
-    };
+        } else {
+          console.warn('⚠️ JsBarcode not loaded yet, retrying...', retryCount);
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(generateBarcode, 100);
+          } else {
+            console.error('❌ JsBarcode failed to load after', maxRetries, 'retries');
+          }
+        }
+      };
+      
+      // Start generation after small delay
+      setTimeout(generateBarcode, 100);
+    }
+  }, [showDetailModal, selectedProduct]);
 
+  // Handle create/edit
+  const handleSaveProduct = async (productData) => {
+    try {
+      if (editingProduct) {
+        await api.put(`/products/${editingProduct.id}`, productData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        alert('✅ Produk berhasil diupdate!');
+      } else {
+        await api.post('/products', productData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        alert('✅ Produk berhasil ditambahkan!');
+      }
+      setShowForm(false);
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.error('Save product error:', error);
+      alert('❌ Gagal menyimpan produk: ' + error.response?.data?.message);
+    }
+  };
+
+  // Handle delete
+  const handleDelete = async (id) => {
+    if (!window.confirm('Yakin ingin menghapus produk ini?')) return;
+
+    try {
+      await api.delete(`/products/${id}`);
+      alert('✅ Produk berhasil dihapus!');
+      fetchProducts();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('❌ Gagal menghapus produk');
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) {
+      alert('Pilih produk yang ingin dihapus');
+      return;
+    }
+
+    if (!window.confirm(`Yakin ingin menghapus ${selectedProducts.length} produk?`)) return;
+
+    try {
+      await api.post('/products/bulk-delete', { ids: selectedProducts });
+      alert(`✅ ${selectedProducts.length} produk berhasil dihapus!`);
+      setSelectedProducts([]);
+      fetchProducts();
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      alert('❌ Gagal menghapus produk');
+    }
+  };
+
+  // Handle select all
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedProducts(products.map(p => p.id));
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  // Handle select single
+  const handleSelectProduct = (id) => {
+    if (selectedProducts.includes(id)) {
+      setSelectedProducts(selectedProducts.filter(pid => pid !== id));
+    } else {
+      setSelectedProducts([...selectedProducts, id]);
+    }
+  };
+
+  // Reset filters
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('');
+    setStockFilter('');
+    setSortBy('created_at');
+    setSortOrder('DESC');
+    setPage(1);
+  };
+
+  if (loading && products.length === 0) {
     return (
-      <div className="rounded-lg shadow-lg p-6 mb-6" style={{ backgroundColor: '#FFFFFF' }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>Add New Product</h2>
-          <button 
+      <AdminLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-xl" style={{ color: '#2C3E50' }}>Loading...</div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>
+              <FaBox className="inline mr-2" /> Product Management
+            </h1>
+            <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
+              Kelola produk yang dijual di toko
+            </p>
+          </div>
+          <button
             onClick={() => {
-              setShowAddForm(false);
-              navigate('/admin/products');
+              setEditingProduct(null);
+              setShowForm(true);
             }}
-            className="text-2xl font-bold hover:opacity-70"
-            style={{ color: '#2C3E50' }}
+            className="px-6 py-3 rounded-lg font-semibold transition-all hover:opacity-90 flex items-center"
+            style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
           >
-            ×
+            ➕ Tambah Produk
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Product Name ONLY - HAPUS Barcode Section */}
-          <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Name *</label>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-              style={{ 
-                borderColor: '#2C3E50',
-                backgroundColor: '#F8F9FA',
-                color: '#2C3E50'
-              }}
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="Enter product name"
-            />
-          </div>
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" style={{ color: '#2C3E50' }} />
+              <input
+                type="text"
+                placeholder="Cari nama produk..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 px-4 py-2 border-2 rounded-lg focus:outline-none"
+                style={{ borderColor: '#E8E8E8' }}
+              />
+            </div>
 
-          {/* Row 2: Category & Image Upload - sekarang jadi Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Category *</label>
+            {/* Category Filter */}
+            <div className="relative">
+              <FaFolderOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" style={{ color: '#2C3E50' }} />
               <select
-                required
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.category_id}
-                onChange={(e) => setFormData({...formData, category_id: e.target.value})}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full pl-10 px-4 py-2 border-2 rounded-lg focus:outline-none"
+                style={{ borderColor: '#E8E8E8', color: '#2C3E50' }}
               >
-                <option value="">Select Category</option>
+                <option value="">Semua Kategori</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Image</label>
-              <div className="space-y-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium"
-                  style={{ 
-                    borderColor: '#2C3E50',
-                    backgroundColor: '#F8F9FA',
-                    color: '#2C3E50'
-                  }}
-                  onChange={handleImageChange}
-                />
-                
-                {/* Image Preview */}
-                {imagePreview && (
-                  <div className="mt-2">
-                    <p className="text-xs mb-1" style={{ color: '#2C3E50' }}>Preview:</p>
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="w-20 h-20 object-cover rounded-md border-2"
-                      style={{ borderColor: '#2C3E50' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData({...formData, image: null});
-                        setImagePreview(null);
-                      }}
-                      className="ml-2 text-xs hover:underline"
-                      style={{ color: '#2C3E50' }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-                
-                <p className="text-xs opacity-60" style={{ color: '#2C3E50' }}>
-                  Supported: JPG, PNG, GIF (Max 5MB)
-                </p>
-              </div>
-            </div>
-          </div>
+            {/* Stock Status Filter */}
+            <select
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value)}
+              className="px-4 py-2 border-2 rounded-lg focus:outline-none"
+              style={{ borderColor: '#E8E8E8', color: '#2C3E50' }}
+            >
+              <option value="">Semua Stok</option>
+              <option value="available">Ada Stok</option>
+              <option value="low">Stok Menipis</option>
+              <option value="out">Habis</option>
+            </select>
 
-          {/* Row 3: Price & Stock Only - HAPUS Min Stock */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Price *</label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.price}
-                onChange={(e) => setFormData({...formData, price: e.target.value})}
-                placeholder="0"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Stock</label>
-              <input
-                type="number"
-                min="0"
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.stock}
-                onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                placeholder="0"
-              />
-              <p className="text-xs opacity-60 mt-1" style={{ color: '#2C3E50' }}>
-                💡 Min stock will be auto-calculated (10% of stock)
-              </p>
-            </div>
-
-            {/* HAPUS Min Stock field completely */}
-          </div>
-
-          {/* Row 4: Description */}
-          <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Description</label>
-            <textarea
-              rows="3"
-              className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 resize-none"
-              style={{ 
-                borderColor: '#2C3E50',
-                backgroundColor: '#F8F9FA',
-                color: '#2C3E50'
+            {/* Sort */}
+            <select
+              value={`${sortBy}_${sortOrder}`}
+              onChange={(e) => {
+                const [field, order] = e.target.value.split('_');
+                setSortBy(field);
+                setSortOrder(order);
               }}
-              value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              placeholder="Enter product description (optional)"
-            />
-          </div>
+              className="px-4 py-2 border-2 rounded-lg focus:outline-none"
+              style={{ borderColor: '#E8E8E8', color: '#2C3E50' }}
+            >
+              <option value="name_ASC">Nama A-Z</option>
+              <option value="name_DESC">Nama Z-A</option>
+              <option value="price_ASC">Harga Termurah</option>
+              <option value="price_DESC">Harga Termahal</option>
+              <option value="stock_ASC">Stok Terkecil</option>
+              <option value="stock_DESC">Stok Terbanyak</option>
+              <option value="created_at_DESC">Terbaru</option>
+              <option value="created_at_ASC">Terlama</option>
+            </select>
 
-          {/* Submit Buttons */}
-          <div className="flex space-x-4 pt-4">
+            {/* Reset Button */}
             <button
-              type="button"
-              onClick={() => {
-                setShowAddForm(false);
-                navigate('/admin/products');
-              }}
-              className="px-6 py-2 rounded-md font-medium border-2 transition-all duration-200"
-              style={{ 
-                backgroundColor: 'transparent',
-                color: '#2C3E50',
-                borderColor: '#2C3E50'
-              }}
+              onClick={handleResetFilters}
+              className="px-4 py-2 border-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center"
+              style={{ borderColor: '#E8E8E8', color: '#2C3E50' }}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-6 py-2 rounded-md font-medium transition-all duration-200 disabled:opacity-50"
-              style={{ 
-                backgroundColor: '#2C3E50',
-                color: '#2C3E50'
-              }}
-            >
-              {submitting ? 'Adding...' : 'Add Product'}
+              <FaTimes className="mr-1" /> Reset
             </button>
           </div>
-        </form>
-      </div>
-    );
-  };
+        </div>
 
-  // Add function to view product details
-  const handleViewProduct = (product) => {
-    console.log('Selected product:', product);  // Debug log
-    setSelectedProduct(product);
-    setShowDetailModal(true);
-  };
-
-  const handleEditProduct = (product) => {
-    setEditingProduct(product);
-    setShowEditForm(true);
-  };
-
-  const handleDeleteProduct = async (product) => {
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      try {
-        await api.delete(`/products/${product.id}`);
-        alert('Product deleted successfully!');
-        fetchData(); // Refresh the product list
-      } catch (error) {
-        console.error('Delete product error:', error);
-        alert('Failed to delete product: ' + (error.response?.data?.error || error.message));
-      }
-    }
-  };
-
-  // Product Detail Modal Component
-  const ProductDetailModal = () => {
-    const [barcodeImage, setBarcodeImage] = useState(null);
-
-    useEffect(() => {
-      if (selectedProduct?.barcode) {
-        generateBarcodeImage(selectedProduct.barcode);
-      }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const generateBarcodeImage = (barcodeValue) => {
-      try {
-        const canvas = document.createElement('canvas');
-        JsBarcode(canvas, barcodeValue, {
-          format: "CODE128",
-          width: 2,
-          height: 80,
-          displayValue: true,
-          fontSize: 16,
-          margin: 10,
-          background: "#F8F9FA",
-          lineColor: "#2C3E50"
-        });
-        setBarcodeImage(canvas.toDataURL());
-      } catch (error) {
-        console.error('Barcode generation error:', error);
-        setBarcodeImage(null);
-      }
-    };
-
-    if (!selectedProduct) return null;
-
-    const profit = selectedProduct.price - (selectedProduct.cost || 0);
-    const profitPercentage = selectedProduct.cost ? ((profit / selectedProduct.cost) * 100).toFixed(1) : 0;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FFFFFF' }}>
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold flex items-center" style={{ color: '#2C3E50' }}>
-              📦 Product Details
-            </h2>
-            <button 
-              onClick={() => setShowDetailModal(false)}
-              className="text-3xl font-bold hover:opacity-70 transition-opacity"
-              style={{ color: '#2C3E50' }}
-            >
-              ×
-            </button>
-          </div>
-
-          {/* Product Image */}
-          {selectedProduct.image_url && (
-            <div className="text-center mb-6">
-              <div className="inline-block p-4 rounded-lg border-2" style={{ backgroundColor: '#F8F9FA', borderColor: '#2C3E50' }}>
-                <img 
-                  src={`http://localhost:5000${selectedProduct.image_url}`} 
-                  alt={selectedProduct.name}
-                  className="w-32 h-32 object-cover rounded-md"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Product Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Product Name</h3>
-                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.name}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Selling Price</h3>
-                <p className="text-xl font-bold" style={{ color: '#2C3E50' }}>Rp {selectedProduct.price?.toLocaleString()}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Profit</h3>
-                <p className="text-lg font-bold" style={{ color: profit >= 0 ? '#4CAF50' : '#FF5722' }}>
-                  Rp {profit.toLocaleString()} ({profitPercentage}%)
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Current Stock</h3>
-                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.stock} units</p>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Category</h3>
-                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.category_name}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Cost Price</h3>
-                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>Rp {(selectedProduct.cost || 0).toLocaleString()}</p>
-              </div>
-
-              {/* Barcode Section */}
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Barcode</h3>
-                {selectedProduct.barcode ? (
-                  <div className="mt-2">
-                    <div className="p-3 rounded-md border-2 bg-white text-center" style={{ borderColor: '#2C3E50' }}>
-                      {barcodeImage ? (
-                        <div>
-                          <img 
-                            src={barcodeImage} 
-                            alt="Product Barcode" 
-                            className="mx-auto block"
-                            style={{ maxWidth: '100%' }}
-                          />
-                        </div>
-                      ) : (
-                        <p className="text-lg font-mono font-bold" style={{ color: '#2C3E50' }}>
-                          {selectedProduct.barcode}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm opacity-60" style={{ color: '#2C3E50' }}>No barcode</p>
-                )}
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium opacity-70" style={{ color: '#2C3E50' }}>Min Stock Alert</h3>
-                <p className="text-lg font-bold" style={{ color: '#2C3E50' }}>{selectedProduct.min_stock} units</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          {selectedProduct.description && (
-            <div className="mt-6">
-              <h3 className="text-sm font-medium opacity-70 mb-2" style={{ color: '#2C3E50' }}>Description</h3>
-              <div className="p-4 rounded-md border-2" style={{ backgroundColor: '#F8F9FA', borderColor: '#2C3E50' }}>
-                <p className="text-sm leading-relaxed" style={{ color: '#2C3E50' }}>
-                  {selectedProduct.description}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Status */}
-          <div className="mt-6 text-center">
-            <span 
-              className="px-6 py-2 rounded-full text-sm font-bold"
-              style={{
-                backgroundColor: selectedProduct.stock_status === 'normal' ? '#4CAF50' : 
-                                selectedProduct.stock_status === 'low' ? '#FF9800' : '#FF5722',
-                color: '#FFFFFF'
-              }}
-            >
-              Status: {selectedProduct.stock_status === 'normal' ? 'Normal Stock' :
-                       selectedProduct.stock_status === 'low' ? 'Low Stock' : 'Out of Stock'}
+        {/* Bulk Actions */}
+        {selectedProducts.length > 0 && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between">
+            <span className="font-semibold" style={{ color: '#2C3E50' }}>
+              {selectedProducts.length} produk dipilih
             </span>
-          </div>
-
-          {/* Close Button */}
-          <div className="mt-6 text-center">
             <button
-              onClick={() => setShowDetailModal(false)}
-              className="px-8 py-3 rounded-md font-medium transition-all duration-200"
-              style={{ 
-                backgroundColor: '#2C3E50',
-                color: '#2C3E50'
-              }}
+              onClick={handleBulkDelete}
+              className="px-4 py-2 rounded-lg font-semibold transition-all hover:opacity-90 flex items-center"
+              style={{ backgroundColor: '#E74C3C', color: '#FFFFFF' }}
             >
-              Close
+              <FaTrash className="mr-1" /> Hapus Terpilih
             </button>
           </div>
-        </div>
-      </div>
-    );
+        )}
 
-  };
-
-  // Edit Product Form Component
-  const EditProductForm = () => {
-    const [formData, setFormData] = useState({
-      name: editingProduct?.name || '',
-      category_id: editingProduct?.category_id || '',
-      price: editingProduct?.price || '',
-      stock: editingProduct?.stock || '',
-      description: editingProduct?.description || '',
-      image: null
-    });
-    const [submitting, setSubmitting] = useState(false);
-    const [imagePreview, setImagePreview] = useState(
-      editingProduct?.image_url ? `http://localhost:5000${editingProduct.image_url}` : null
-    );
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setSubmitting(true);
-
-      try {
-        const submitData = new FormData();
-        submitData.append('name', formData.name);
-        submitData.append('category_id', parseInt(formData.category_id));
-        submitData.append('price', parseFloat(formData.price));
-        submitData.append('stock', parseInt(formData.stock) || 0);
-        
-        const stock = parseInt(formData.stock) || 0;
-        const autoMinStock = Math.max(1, Math.floor(stock * 0.1));
-        submitData.append('min_stock', autoMinStock);
-        
-        submitData.append('description', formData.description);
-        
-        if (formData.image) {
-          submitData.append('image', formData.image);
-        }
-        
-        await api.put(`/products/${editingProduct.id}`, submitData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        alert('Product updated successfully!');
-        setShowEditForm(false);
-        setEditingProduct(null);
-        fetchData();
-        
-      } catch (error) {
-        alert('Failed to update product: ' + (error.response?.data?.error || error.message));
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FFFFFF' }}>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold" style={{ color: '#2C3E50' }}>✏️ Edit Product</h2>
-            <button 
-              onClick={() => {
-                setShowEditForm(false);
-                setEditingProduct(null);
-              }}
-              className="text-2xl font-bold hover:opacity-70"
-              style={{ color: '#2C3E50' }}
-            >
-              ×
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Product Name */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Product Name *</label>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
-
-            {/* Category & Price */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Category *</label>
-                <select
-                  required
-                  className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                  style={{ 
-                    borderColor: '#2C3E50',
-                    backgroundColor: '#F8F9FA',
-                    color: '#2C3E50'
-                  }}
-                  value={formData.category_id}
-                  onChange={(e) => setFormData({...formData, category_id: e.target.value})}
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Price *</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                  style={{ 
-                    borderColor: '#2C3E50',
-                    backgroundColor: '#F8F9FA',
-                    color: '#2C3E50'
-                  }}
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                />
-              </div>
-            </div>
-
-            {/* Stock */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Stock</label>
-              <input
-                type="number"
-                min="0"
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.stock}
-                onChange={(e) => setFormData({...formData, stock: e.target.value})}
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Description</label>
-              <textarea
-                rows="3"
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70 resize-none"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-              />
-            </div>
-
-            {/* Current Image Preview */}
-            {imagePreview && (
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>Current Image</label>
-                <img 
-                  src={imagePreview} 
-                  alt="Current product" 
-                  className="w-20 h-20 object-cover rounded-md border-2"
-                  style={{ borderColor: '#2C3E50' }}
-                />
-              </div>
-            )}
-
-            {/* New Image Upload */}
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#2C3E50' }}>
-                {imagePreview ? 'Change Image' : 'Upload Image'}
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                className="w-full px-3 py-2 border-2 rounded-md focus:outline-none focus:border-opacity-70"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F8F9FA',
-                  color: '#2C3E50'
-                }}
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setFormData({...formData, image: file});
-                    
-                    // Show preview of new image
-                    const reader = new FileReader();
-                    reader.onload = (e) => setImagePreview(e.target.result);
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              <p className="text-xs mt-1 opacity-70" style={{ color: '#2C3E50' }}>
-                Max file size: 5MB. Formats: JPG, PNG, GIF
-              </p>
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditForm(false);
-                  setEditingProduct(null);
-                }}
-                className="px-6 py-2 rounded-md font-medium border-2 transition-all duration-200"
-                style={{ 
-                  backgroundColor: 'transparent',
-                  color: '#2C3E50',
-                  borderColor: '#2C3E50'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-6 py-2 rounded-md font-medium transition-all duration-200 disabled:opacity-50"
-                style={{ 
-                  backgroundColor: '#2C3E50',
-                  color: '#ffffff'
-                }}
-              >
-                {submitting ? 'Updating...' : 'Update Product'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F8F9FA' }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#2C3E50' }}></div>
-          <p className="mt-4" style={{ color: '#2C3E50' }}>Loading products...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <AdminLayout>
-      {/* Page Actions */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
-            Product Management
-          </h1>
-          <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
-            Manage your store products and inventory
-          </p>
-        </div>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-            style={{ 
-              backgroundColor: '#2C3E50',
-              color: '#FFFFFF'
-            }}
-          >
-            + Add Product
-          </button>
-          <button
-            onClick={() => navigate('/admin')}
-              className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 border-2 hover:bg-gray-50"
-              style={{ 
-                backgroundColor: '#FFFFFF',
-                color: '#2C3E50',
-                borderColor: '#2C3E50'
-              }}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </div>
-
-        {/* Add Product Form */}
-        {showAddForm && <AddProductForm />}
-
-        {/* Products List */}
-        <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: '#FFFFFF' }}>
-          <h2 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-            All Products ({products.length})
-          </h2>
-          
+        {/* Products Table */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
-                <tr className="border-b-2" style={{ borderColor: '#2C3E50' }}>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Image</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Product</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Category</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Price</th>
-                  {/* HAPUS Cost column */}
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Stock</th>
-                  <th className="text-left py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Status</th>
-                  <th className="text-center py-2 px-4 font-medium" style={{ color: '#2C3E50' }}>Actions</th>
+              <thead style={{ backgroundColor: '#2C3E50' }}>
+                <tr>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.length === products.length && products.length > 0}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Produk
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Kategori
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Harga
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Stok
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Satuan
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#FFFFFF' }}>
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold" style={{ color: '#FFFFFF' }}>
+                    Aksi
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-b hover:opacity-75 transition-opacity" style={{ borderColor: '#2C3E50' }}>
-                    {/* Image */}
-                    <td className="py-3 px-4">
-                      <div className="w-12 h-12 rounded-md border-2 flex items-center justify-center" style={{ borderColor: '#2C3E50', backgroundColor: '#F8F9FA' }}>
-                        {product.image_url ? (
-                          <img 
-                            src={`http://localhost:5000${product.image_url}`} 
-                            alt={product.name}
-                            className="w-full h-full object-cover rounded"
-                          />
-                        ) : (
-                          <span className="text-lg">📦</span>
-                        )}
+                {products.map((product, index) => (
+                  <tr 
+                    key={product.id}
+                    className="border-b hover:bg-gray-50 transition-colors"
+                    style={{ borderColor: '#E8E8E8' }}
+                  >
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={() => handleSelectProduct(product.id)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={product.image_url ? `http://localhost:5000${product.image_url}` : 'https://via.placeholder.com/50'}
+                          alt={product.name}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                        <div>
+                          <p className="font-semibold" style={{ color: '#2C3E50' }}>
+                            {product.name}
+                          </p>
+                        </div>
                       </div>
                     </td>
-
-                    {/* Product Info */}
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium" style={{ color: '#2C3E50' }}>{product.name}</p>
-                      </div>
-                    </td>
-
-                    {/* Category */}
-                    <td className="py-3 px-4" style={{ color: '#2C3E50' }}>
-                      {product.category_name}
-                    </td>
-
-                    {/* Price (Selling Price Only) */}
-                    <td className="py-3 px-4 font-medium" style={{ color: '#2C3E50' }}>
-                      Rp {product.price?.toLocaleString() || '0'}
-                    </td>
-
-                    {/* HAPUS Cost column - jangan tampilkan di sini */}
-
-                    {/* Stock */}
-                    <td className="py-3 px-4" style={{ color: '#2C3E50' }}>
-                      {product.stock}
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-3 px-4">
-                      <span 
-                        className="px-3 py-1 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: product.stock_status === 'normal' ? '#2C3E50' : 
-                                          product.stock_status === 'low' ? '#ECF0F1' : '#FF6B6B',
-                          color: '#2C3E50'
-                        }}
-                      >
-                        {product.stock_status === 'normal' ? 'Normal' :
-                         product.stock_status === 'low' ? 'Low Stock' : 'Out of Stock'}
+                    <td className="px-4 py-4">
+                      <span className="text-sm" style={{ color: '#2C3E50' }}>
+                        {product.category_name}
                       </span>
                     </td>
-
-                    {/* Actions */}
-                    <td className="py-3 px-4">
-                      <div className="flex justify-center space-x-2">
+                    <td className="px-4 py-4">
+                      <span className="font-semibold" style={{ color: '#2C3E50' }}>
+                        Rp {parseInt(product.price).toLocaleString('id-ID')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span 
+                        className="font-semibold"
+                        style={{ 
+                          color: product.stock === 0 ? '#E74C3C' : 
+                                 product.stock <= product.min_stock ? '#F39C12' : '#27AE60'
+                        }}
+                      >
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="text-sm" style={{ color: '#2C3E50' }}>
+                        {product.unit}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      {product.stock === 0 ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#FADBD8', color: '#E74C3C' }}>
+                          <FaTimes className="mr-1" /> Habis
+                        </span>
+                      ) : product.stock <= product.min_stock ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#FCF3CF', color: '#F39C12' }}>
+                          <FaExclamationTriangle className="mr-1" /> Menipis
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#D5F4E6', color: '#27AE60' }}>
+                          <FaCheck className="mr-1" /> Normal
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center space-x-2">
                         <button
-                          onClick={() => handleViewProduct(product)}
-                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
-                          style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
-                          title="View Details"
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            setShowDetailModal(true);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:opacity-80 flex items-center"
+                          style={{ backgroundColor: '#9B59B6', color: '#FFFFFF' }}
+                          title="Lihat Detail & Barcode"
                         >
-                          👁️
+                          <FaEye className="mr-1" /> Detail
                         </button>
                         <button
-                          onClick={() => handleEditProduct(product)}
-                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
+                          onClick={() => {
+                            setEditingProduct(product);
+                            setShowForm(true);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:opacity-80 flex items-center"
                           style={{ backgroundColor: '#3498DB', color: '#FFFFFF' }}
-                          title="Edit Product"
                         >
-                          ✏️
+                          <FaEdit className="mr-1" /> Edit
                         </button>
                         <button
-                          onClick={() => handleDeleteProduct(product)}
-                          className="p-2 rounded-lg transition-all duration-200 hover:scale-110 shadow-md"
-                          style={{ backgroundColor: '#FF6B6B', color: '#FFFFFF' }}
-                          title="Delete Product"
+                          onClick={() => handleDelete(product.id)}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:opacity-80 flex items-center"
+                          style={{ backgroundColor: '#E74C3C', color: '#FFFFFF' }}
                         >
-                          🗑️
+                          <FaTrash className="mr-1" /> Hapus
                         </button>
                       </div>
                     </td>
@@ -935,21 +504,188 @@ const ProductManagement = () => {
               </tbody>
             </table>
           </div>
-        </div>
 
-      {/* Product Detail Modal */}
-      {showDetailModal && selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedProduct(null);
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="px-6 py-4 flex items-center justify-between border-t" style={{ borderColor: '#E8E8E8' }}>
+              <span className="text-sm" style={{ color: '#2C3E50' }}>
+                Showing {products.length} of {pagination.total} products
+              </span>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:opacity-80"
+                  style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
+                >
+                  ← Previous
+                </button>
+                <span className="px-4 py-2 font-semibold" style={{ color: '#2C3E50' }}>
+                  Page {page} of {pagination.totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === pagination.totalPages}
+                  className="px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:opacity-80"
+                  style={{ backgroundColor: '#2C3E50', color: '#FFFFFF' }}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Product Form Modal */}
+      {showForm && (
+        <ProductForm
+          product={editingProduct}
+          categories={categories}
+          onSave={handleSaveProduct}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingProduct(null);
           }}
         />
       )}
 
-      {/* Edit Product Form Modal */}
-      {showEditForm && <EditProductForm />}
+      {/* Product Detail Modal */}
+      {showDetailModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 px-6 py-4 border-b flex items-center justify-between" style={{ backgroundColor: '#2C3E50', borderColor: '#E8E8E8' }}>
+              <h3 className="text-xl font-bold" style={{ color: '#FFFFFF' }}>
+                <FaBox className="inline mr-2" /> Detail Produk
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  setSelectedProduct(null);
+                }}
+                className="text-white hover:text-gray-300 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Product Image */}
+              <div className="flex justify-center">
+                <img
+                  src={selectedProduct.image_url ? `http://localhost:5000${selectedProduct.image_url}` : 'https://via.placeholder.com/300'}
+                  alt={selectedProduct.name}
+                  className="w-64 h-64 rounded-xl object-cover shadow-lg border-4"
+                  style={{ borderColor: '#2C3E50' }}
+                />
+              </div>
+
+              {/* Product Info Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Nama Produk</label>
+                  <p className="text-lg font-bold mt-1" style={{ color: '#2C3E50' }}>{selectedProduct.name}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Kategori</label>
+                  <p className="text-base font-semibold mt-1" style={{ color: '#2C3E50' }}>{selectedProduct.category_name}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Harga Jual</label>
+                  <p className="text-base font-bold mt-1" style={{ color: '#27AE60' }}>
+                    Rp {parseInt(selectedProduct.price).toLocaleString('id-ID')}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Stok</label>
+                  <p className="text-base font-bold mt-1" style={{ color: selectedProduct.stock === 0 ? '#E74C3C' : '#2C3E50' }}>
+                    {selectedProduct.stock} {selectedProduct.unit}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Satuan</label>
+                  <p className="text-base font-semibold mt-1" style={{ color: '#2C3E50' }}>{selectedProduct.unit}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Min. Stok</label>
+                  <p className="text-base font-semibold mt-1" style={{ color: '#2C3E50' }}>{selectedProduct.min_stock}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Status</label>
+                  <div className="mt-1">
+                    {selectedProduct.stock === 0 ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#FADBD8', color: '#E74C3C' }}>
+                        <FaTimes className="mr-1" /> Habis
+                      </span>
+                    ) : selectedProduct.stock <= selectedProduct.min_stock ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#FCF3CF', color: '#F39C12' }}>
+                        <FaExclamationTriangle className="mr-1" /> Menipis
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center" style={{ backgroundColor: '#D5F4E6', color: '#27AE60' }}>
+                        <FaCheck className="mr-1" /> Normal
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {selectedProduct.description && (
+                  <div className="col-span-2">
+                    <label className="text-sm font-semibold opacity-70" style={{ color: '#2C3E50' }}>Deskripsi</label>
+                    <p className="text-sm mt-1 opacity-80" style={{ color: '#2C3E50' }}>{selectedProduct.description}</p>
+                  </div>
+                )}
+
+                {/* Barcode Section */}
+                <div className="col-span-2 mt-4 p-4 rounded-xl border-2" style={{ borderColor: '#2C3E50', backgroundColor: '#F8F9FA' }}>
+                  <label className="text-sm font-semibold opacity-70 block mb-2 flex items-center" style={{ color: '#2C3E50' }}>
+                    <FaBarcode className="mr-2" /> Barcode
+                  </label>
+                  <div className="flex items-center justify-center">
+                    {selectedProduct.barcode ? (
+                      <div className="text-center">
+                        <div className="bg-white p-4 rounded-lg inline-block mb-2">
+                          <canvas
+                            id={`barcode-${selectedProduct.id}`}
+                            className="mx-auto"
+                          ></canvas>
+                        </div>
+                        <p className="text-lg font-mono font-bold" style={{ color: '#2C3E50' }}>
+                          {selectedProduct.barcode}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-sm opacity-60" style={{ color: '#2C3E50' }}>Barcode belum tersedia</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t flex justify-end space-x-3" style={{ borderColor: '#E8E8E8' }}>
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  setSelectedProduct(null);
+                }}
+                className="px-6 py-2 rounded-lg font-semibold transition-colors hover:opacity-80"
+                style={{ backgroundColor: '#95A5A6', color: '#FFFFFF' }}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

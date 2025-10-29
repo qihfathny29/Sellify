@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../api/axios';
+import { FaUsers, FaUser, FaUserTie, FaUserCog, FaSearch, FaChartBar, FaCheck, FaTimes, FaEdit, FaBan, FaCheckCircle, FaTrash, FaPlus, FaLock, FaBox, FaTags, FaMoneyBillWave, FaChartLine, FaSave } from 'react-icons/fa';
 
 const UserManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -218,13 +219,14 @@ const UserManagement = () => {
     const isActive = status === 1 || status === 'active' || status === true;
     return (
       <span 
-        className="px-2 py-1 rounded-full text-xs font-medium"
+        className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
         style={{ 
           backgroundColor: isActive ? '#4CAF50' : '#FF5722',
           color: 'white'
         }}
       >
-        {isActive ? '✓ Active' : '✖ Blocked'}
+        {isActive ? <FaCheck className="inline-block" /> : <FaTimes className="inline-block" />}
+        {isActive ? 'Active' : 'Blocked'}
       </span>
     );
   };
@@ -232,15 +234,16 @@ const UserManagement = () => {
   const getRoleBadge = (role) => {
     return (
       <span 
-        className="px-2 py-1 rounded-full text-xs font-medium"
+        className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
         style={{ 
           backgroundColor: role === 'admin' ? '#9C27B0' : role === 'supervisor' ? '#FF9800' : '#2196F3',
           color: 'white'
         }}
       >
-        {role === 'admin' && '👑 Admin'}
-        {role === 'supervisor' && '👨‍💼 Supervisor'}
-        {role === 'kasir' && '👤 Kasir'}
+        {role === 'admin' && <FaUserCog className="inline-block" />}
+        {role === 'supervisor' && <FaUserTie className="inline-block" />}
+        {role === 'kasir' && <FaUser className="inline-block" />}
+        {role.charAt(0).toUpperCase() + role.slice(1)}
       </span>
     );
   };
@@ -264,7 +267,7 @@ const UserManagement = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>👥 User Management</h1>
+            <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}><FaUsers /> User Management</h1>
             <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
               Manage kasir accounts and permissions
             </p>
@@ -275,13 +278,13 @@ const UserManagement = () => {
               resetForm();
               setShowAddModal(true);
             }}
-            className="px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+            className="px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
             style={{ 
               backgroundColor: '#2C3E50',
               color: '#FFFFFF'
             }}
           >
-            ➕ Add New User
+            <FaPlus /> Add New User
           </button>
         </div>
 
@@ -290,8 +293,8 @@ const UserManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                🔍 Search Users
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaSearch /> Search Users
               </label>
               <input
                 type="text"
@@ -309,8 +312,8 @@ const UserManagement = () => {
 
             {/* Role Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                👤 Role
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaUser /> Role
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
@@ -331,8 +334,8 @@ const UserManagement = () => {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#2C3E50' }}>
-                📊 Status
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                <FaChartBar /> Status
               </label>
               <select
                 className="w-full px-3 py-2 border-2 rounded-md focus:outline-none"
@@ -386,25 +389,25 @@ const UserManagement = () => {
             <table className="w-full">
               <thead style={{ backgroundColor: '#2C3E50' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Performance
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Last Login
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#2C3E50' }}>
+                  <th className="px-6 py-3 text-left text-sm font-medium" style={{ color: '#ffffff' }}>
                     Actions
                   </th>
                 </tr>
@@ -449,33 +452,33 @@ const UserManagement = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => openEditModal(user)}
-                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md flex items-center gap-1"
                           style={{ 
                             backgroundColor: '#2C3E50',
                             color: '#FFFFFF'
                           }}
                         >
-                          ✏️ Edit
+                          <FaEdit /> Edit
                         </button>
                         <button
                           onClick={() => handleToggleStatus(user.id_user, user.is_active)}
-                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md flex items-center gap-1"
                           style={{ 
                             backgroundColor: user.is_active ? '#FF5722' : '#4CAF50',
                             color: 'white'
                           }}
                         >
-                          {user.is_active ? '❌ Block' : '✅ Activate'}
+                          {user.is_active ? <FaBan /> : <FaCheckCircle />} {user.is_active ? 'Block' : 'Activate'}
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user.id_user)}
-                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md"
+                          className="px-3 py-1 text-xs rounded-lg font-semibold transition-colors duration-200 shadow-md flex items-center gap-1"
                           style={{ 
                             backgroundColor: '#F44336',
                             color: 'white'
                           }}
                         >
-                          🗑️ Delete
+                          <FaTrash /> Delete
                         </button>
                       </div>
                     </td>
@@ -487,7 +490,7 @@ const UserManagement = () => {
 
           {filteredUsers.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-xl" style={{ color: '#2C3E50' }}>👥</p>
+              <p className="text-xl flex items-center justify-center" style={{ color: '#2C3E50' }}><FaUsers /></p>
               <p style={{ color: '#2C3E50' }}>No users found</p>
               <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
                 Try adjusting your filters
@@ -502,8 +505,8 @@ const UserManagement = () => {
             <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
               <form onSubmit={handleAddUser} className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
-                    ➕ Add New User
+                  <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <FaPlus /> Add New User
                   </h2>
                   <button
                     type="button"
@@ -511,7 +514,7 @@ const UserManagement = () => {
                     className="text-2xl hover:opacity-75"
                     style={{ color: '#2C3E50' }}
                   >
-                    ✕
+                    <FaTimes />
                   </button>
                 </div>
 
@@ -630,20 +633,20 @@ const UserManagement = () => {
 
                 {/* Permissions */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3" style={{ color: '#2C3E50' }}>
-                    🔐 Permissions
+                  <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <FaLock /> Permissions
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {Object.entries(formData.permissions).map(([key, value]) => (
                       <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
-                        <span className="text-sm" style={{ color: '#2C3E50' }}>
-                          {key === 'processSales' && '💰 Process Sales'}
-                          {key === 'viewProducts' && '📦 View Products'}
-                          {key === 'applyDiscounts' && '🏷️ Apply Discounts'}
-                          {key === 'editPrices' && '💱 Edit Prices'}
-                          {key === 'deleteTransactions' && '🗑️ Delete Transactions'}
-                          {key === 'viewReports' && '📊 View Reports'}
-                          {key === 'manageUsers' && '👥 Manage Users'}
+                        <span className="text-sm flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                          {key === 'processSales' && <><FaMoneyBillWave /> Process Sales</>}
+                          {key === 'viewProducts' && <><FaBox /> View Products</>}
+                          {key === 'applyDiscounts' && <><FaTags /> Apply Discounts</>}
+                          {key === 'editPrices' && <><FaChartLine /> Edit Prices</>}
+                          {key === 'deleteTransactions' && <><FaTrash /> Delete Transactions</>}
+                          {key === 'viewReports' && <><FaChartBar /> View Reports</>}
+                          {key === 'manageUsers' && <><FaUsers /> Manage Users</>}
                         </span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -681,13 +684,13 @@ const UserManagement = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50"
+                    className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
                     style={{ 
                       backgroundColor: '#2C3E50',
-                      color: '#2C3E50'
+                      color: '#FFFFFF'
                     }}
                   >
-                    {loading ? 'Adding...' : '➕ Add User'}
+                    {loading ? 'Adding...' : <><FaPlus /> Add User</>}
                   </button>
                 </div>
               </form>
@@ -701,8 +704,8 @@ const UserManagement = () => {
             <div className="max-w-2xl w-full max-h-screen overflow-y-auto rounded-lg shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
               <form onSubmit={handleEditUser} className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
-                    ✏️ Edit User - {selectedUser.full_name}
+                  <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <FaEdit /> Edit User - {selectedUser.full_name}
                   </h2>
                   <button
                     type="button"
@@ -710,7 +713,7 @@ const UserManagement = () => {
                     className="text-2xl hover:opacity-75"
                     style={{ color: '#2C3E50' }}
                   >
-                    ✕
+                    <FaTimes />
                   </button>
                 </div>
 
@@ -829,20 +832,20 @@ const UserManagement = () => {
 
                 {/* Permissions */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3" style={{ color: '#2C3E50' }}>
-                    🔐 Permissions
+                  <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                    <FaLock /> Permissions
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {Object.entries(formData.permissions).map(([key, value]) => (
                       <div key={key} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#F8F9FA' }}>
-                        <span className="text-sm" style={{ color: '#2C3E50' }}>
-                          {key === 'processSales' && '💰 Process Sales'}
-                          {key === 'viewProducts' && '📦 View Products'}
-                          {key === 'applyDiscounts' && '🏷️ Apply Discounts'}
-                          {key === 'editPrices' && '💱 Edit Prices'}
-                          {key === 'deleteTransactions' && '🗑️ Delete Transactions'}
-                          {key === 'viewReports' && '📊 View Reports'}
-                          {key === 'manageUsers' && '👥 Manage Users'}
+                        <span className="text-sm flex items-center gap-1" style={{ color: '#2C3E50' }}>
+                          {key === 'processSales' && <><FaMoneyBillWave /> Process Sales</>}
+                          {key === 'viewProducts' && <><FaBox /> View Products</>}
+                          {key === 'applyDiscounts' && <><FaTags /> Apply Discounts</>}
+                          {key === 'editPrices' && <><FaChartLine /> Edit Prices</>}
+                          {key === 'deleteTransactions' && <><FaTrash /> Delete Transactions</>}
+                          {key === 'viewReports' && <><FaChartBar /> View Reports</>}
+                          {key === 'manageUsers' && <><FaUsers /> Manage Users</>}
                         </span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -880,13 +883,13 @@ const UserManagement = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50"
+                    className="px-6 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
                     style={{ 
                       backgroundColor: '#2C3E50',
-                      color: '#2C3E50'
+                      color: '#FFFFFF'
                     }}
                   >
-                    {loading ? 'Updating...' : '💾 Update User'}
+                    {loading ? 'Updating...' : <><FaSave /> Update User</>}
                   </button>
                 </div>
               </form>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../api/axios';
+import { FaBox, FaMoneyBillWave, FaUsers, FaExclamationTriangle, FAChartBar, FaUserCog, FaChartBar } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -21,22 +22,37 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       // Fetch products for stats
-      const productsResponse = await api.get('/products');
+      const productsResponse = await api.get('/products', { params: { limit: 1000 } });
       const products = productsResponse.data.data || [];
       
+      // Fetch users
+      const usersResponse = await api.get('/users');
+      const users = usersResponse.data.data || [];
+      
+      // Fetch today's transactions
+      const transactionsResponse = await api.get('/transactions/admin/all');
+      const allTransactions = transactionsResponse.data.data || [];
+      
+      const today = new Date().toDateString();
+      const todayTransactions = allTransactions.filter(t => 
+        new Date(t.created_at).toDateString() === today
+      );
+      
+      const todaySales = todayTransactions.reduce((sum, t) => sum + parseFloat(t.total_amount || 0), 0);
+      
       // Calculate stats
-      const totalProducts = products.length;
-      const lowStockProducts = products.filter(p => p.stock <= p.min_stock).length;
+      const totalProducts = products.filter(p => p.is_active === 1 || p.is_active === true).length;
+      const lowStockProducts = products.filter(p => p.stock <= (p.min_stock || 5)).length;
       
       setStats({
         totalProducts,
-        totalUsers: 5, // Placeholder
+        totalUsers: users.length,
         lowStockProducts,
-        todaySales: 2500000 // Placeholder
+        todaySales
       });
 
       // Set recent products (last 5)
-      setRecentProducts(products.slice(-5));
+      setRecentProducts(products.slice(0, 5));
       
     } catch (error) {
       console.error('Dashboard data fetch error:', error);
@@ -52,7 +68,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const StatsCard = ({ title, value, subtitle, icon, isAlert = false }) => (
+  const StatsCard = ({ title, value, subtitle, Icon, iconColor = '#7F8C8D', isAlert = false }) => (
     <div 
       className="rounded-xl shadow-lg p-6 transition-all duration-200 transform hover:scale-105"
       style={{ 
@@ -73,7 +89,7 @@ const AdminDashboard = () => {
           </p>
         </div>
         <div className="text-3xl opacity-60">
-          {icon}
+          <Icon style={{ color: isAlert ? '#FFFFFF' : iconColor }} />
         </div>
       </div>
     </div>
@@ -104,25 +120,29 @@ const AdminDashboard = () => {
             title="Total Products"
             value={stats.totalProducts}
             subtitle="Active products"
-            icon="📦"
+            Icon={FaBox}
+            iconColor="#2C3E50"
           />
           <StatsCard
             title="Today's Sales"
             value={`Rp ${stats.todaySales.toLocaleString()}`}
             subtitle="Revenue today"
-            icon="💰"
+            Icon={FaMoneyBillWave}
+            iconColor="#2C3E50"
           />
           <StatsCard
             title="Total Users"
             value={stats.totalUsers}
             subtitle="Registered users"
-            icon="👥"
+            Icon={FaUsers}
+            iconColor="#2C3E50"
           />
           <StatsCard
             title="Low Stock Alert"
             value={stats.lowStockProducts}
             subtitle="Need restocking"
-            icon="⚠️"
+            Icon={FaExclamationTriangle }
+            iconColor="#DD0303"
             isAlert={stats.lowStockProducts > 0}
           />
         </div>
@@ -135,45 +155,45 @@ const AdminDashboard = () => {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
-            onClick={() => navigate('/admin/products')}
-            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
-            style={{ 
-              backgroundColor: '#FFFFFF',
-              border: '2px solid #ECF0F1'
-            }}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-3">📦</div>
-              <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>Manage Products</h3>
-              <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Add, edit, delete products</p>
-            </div>
-          </button>
+          onClick={() => navigate('/admin/products')}
+          className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl flex items-center gap-4"
+          style={{ 
+            backgroundColor: '#FFFFFF',
+            border: '2px solid #ECF0F1'
+          }}
+        >
+          <FaBox style={{ color: '#2C3E50', fontSize: '2.5rem' }} />
+          <div className="flex flex-col items-start text-left">
+            <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>Manage Products</h3>
+            <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Add, edit, delete products</p>
+          </div>
+        </button>
 
           <button
-            onClick={() => navigate('/admin/reports')}
-            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
-            style={{ 
-              backgroundColor: '#FFFFFF',
-              border: '2px solid #ECF0F1'
-            }}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-3">📊</div>
-              <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>View Reports</h3>
-              <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Sales analytics & insights</p>
-            </div>
-          </button>
+          onClick={() => navigate('/admin/reports')}
+          className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl flex items-center gap-4"
+          style={{ 
+            backgroundColor: '#FFFFFF',
+            border: '2px solid #ECF0F1'
+          }}
+        >
+          <FaChartBar style={{ color: '#2C3E50', fontSize: '2.5rem' }} />
+          <div className="flex flex-col items-start text-left">
+            <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>View Reports</h3>
+            <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Sales analytics & insights</p>
+          </div>
+        </button>
 
           <button
             onClick={() => navigate('/admin/users')}
-            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
+            className="p-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl flex items-center gap-4"
             style={{ 
               backgroundColor: '#FFFFFF',
               border: '2px solid #ECF0F1'
             }}
           >
-            <div className="text-center">
-              <div className="text-3xl mb-3">👥</div>
+            <FaUserCog style={{ color: '#2C3E50', fontSize: '2.5rem' }} />
+            <div className="flex flex-col items-start text-left">
               <h3 className="font-bold text-lg" style={{ color: '#2C3E50' }}>User Management</h3>
               <p className="text-sm mt-2" style={{ color: '#7F8C8D' }}>Manage kasir accounts</p>
             </div>

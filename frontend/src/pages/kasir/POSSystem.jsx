@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import KasirLayout from '../../components/kasir/KasirLayout';
 import api from '../../api/axios';
 import DigitalReceipt from './DigitalReceipt';
+import { FaMoneyBillWave, FaSearch, FaBox, FaShoppingCart, FaTrash, FaCreditCard, FaMobileAlt, FaUniversity, FaTimes, FaCheck, FaHourglassHalf, FaInbox } from 'react-icons/fa';
 
 const POSSystem = () => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState(['all']);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -112,27 +114,24 @@ const POSSystem = () => {
         console.log('🔥 POS - Products Data:', productsData); // DEBUG
         console.log('🔥 POS - First Product:', productsData[0]); // DEBUG - lihat struktur produk pertama
         
-        // Debug: Cek field status dan stock dari setiap produk
+        // Debug: Cek field is_active dan stock dari setiap produk
         productsData.forEach((product, index) => {
           console.log(`🔥 Product ${index + 1}:`, {
             name: product.name,
-            status: product.status,
-            statusType: typeof product.status,
+            is_active: product.is_active,
             stock: product.stock,
-            stockType: typeof product.stock,
-            category_name: product.category_name
+            category_name: product.category_name,
+            image_url: product.image_url
           });
         });
         
-        // Filter only active products - PERBAIKAN FILTER untuk boolean
+        // Filter only active products with stock
         const activeProducts = productsData.filter(product => {
-          // Handle boolean status (true/false) instead of 1/0
-          const isActive = product.status === true || product.status === 1 || product.status === '1';
-          // Stock sudah number, tidak perlu konversi
+          const isActive = product.is_active === true || product.is_active === 1;
           const hasStock = product.stock > 0;
           
           console.log(`🔥 Filtering ${product.name}:`, {
-            originalStatus: product.status,
+            is_active: product.is_active,
             isActive: isActive,
             stock: product.stock,
             hasStock: hasStock,
@@ -344,8 +343,13 @@ Terimakasih telah berbelanja!
     }
   };
 
-  // PERBAIKAN CATEGORIES - Gunakan category_name seperti di Products.jsx
-  const categories = ['all', ...new Set(products.map(p => p.category_name || 'Uncategorized').filter(Boolean))];
+  // Update categories when products change
+  useEffect(() => {
+    if (products.length > 0) {
+      const uniqueCategories = ['all', ...new Set(products.map(p => p.category_name || 'Uncategorized').filter(Boolean))];
+      setCategories(uniqueCategories);
+    }
+  }, [products]);
 
   // Handler saat tutup struk digital
   const handleCloseReceipt = () => {
@@ -377,7 +381,9 @@ Terimakasih telah berbelanja!
         <div className="lg:col-span-2 space-y-4">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#2C3E50' }}>💰 POS System</h1>
+            <h1 className="text-3xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+              <FaMoneyBillWave /> POS System
+            </h1>
             <p className="opacity-70 mt-1" style={{ color: '#2C3E50' }}>
               Pilih produk untuk memulai transaksi
             </p>
@@ -387,19 +393,22 @@ Terimakasih telah berbelanja!
           <div className="rounded-lg shadow-lg p-4" style={{ backgroundColor: '#FFFFFF' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}
-              <input
-                type="text"
-                placeholder="🔍 Cari produk atau scan barcode..."
-                className="w-full px-4 py-2 border-2 rounded-md focus:outline-none"
-                style={{ 
-                  borderColor: '#2C3E50',
-                  backgroundColor: '#F5F5F5',
-                  color: '#2C3E50'
-                }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                autoFocus
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Cari produk atau scan barcode..."
+                  className="w-full px-4 py-2 border-2 rounded-md focus:outline-none pl-10"
+                  style={{ 
+                    borderColor: '#2C3E50',
+                    backgroundColor: '#F5F5F5',
+                    color: '#2C3E50'
+                  }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  autoFocus
+                />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+              </div>
 
               {/* Category Filter */}
               <select
@@ -414,7 +423,7 @@ Terimakasih telah berbelanja!
               >
                 {categories.map(cat => (
                   <option key={cat} value={cat}>
-                    {cat === 'all' ? '📦 Semua Kategori' : cat}
+                    {cat === 'all' ? 'Semua Kategori' : cat}
                   </option>
                 ))}
               </select>
@@ -427,15 +436,15 @@ Terimakasih telah berbelanja!
               <button
                 key={product.id}
                 onClick={() => addToCart(product)}
-                disabled={product.stock === 0 || product.status !== true} // PERBAIKAN: status !== true
+                disabled={product.stock === 0 || !product.is_active}
                 className="rounded-lg shadow-lg p-4 text-left transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#FFFFFF' }}
               >
                 {/* Product Image */}
                 <div className="mb-2">
-                  {product.image ? (
+                  {product.image_url ? (
                     <img
-                      src={`http://localhost:5000${product.image}`}
+                      src={`http://localhost:5000${product.image_url}`}
                       alt={product.name}
                       className="w-16 h-16 mx-auto object-cover rounded-lg"
                       onError={(e) => {
@@ -446,9 +455,9 @@ Terimakasih telah berbelanja!
                   ) : null}
                   <div 
                     className="text-4xl text-center"
-                    style={{ display: product.image ? 'none' : 'block' }}
+                    style={{ display: product.image_url ? 'none' : 'block' }}
                   >
-                    📦
+                    <FaBox />
                   </div>
                 </div>
                 
@@ -470,7 +479,7 @@ Terimakasih telah berbelanja!
 
           {filteredProducts.length === 0 && (
             <div className="text-center py-8 rounded-lg" style={{ backgroundColor: '#FFFFFF' }}>
-              <p className="text-xl" style={{ color: '#2C3E50' }}>📭</p>
+              <p className="text-xl flex items-center justify-center" style={{ color: '#2C3E50' }}><FaInbox /></p>
               <p style={{ color: '#2C3E50' }}>Produk tidak ditemukan</p>
             </div>
           )}
@@ -479,15 +488,15 @@ Terimakasih telah berbelanja!
         {/* Right Side - Shopping Cart */}
         <div className="lg:col-span-1">
           <div className="rounded-lg shadow-lg p-6 sticky top-6" style={{ backgroundColor: '#FFFFFF' }}>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-              🛒 Keranjang
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2" style={{ color: '#2C3E50' }}>
+              <FaShoppingCart /> Keranjang
             </h2>
 
             {/* Cart Items */}
             <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
               {cart.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-4xl mb-2">🛒</p>
+                  <p className="text-4xl mb-2 flex items-center justify-center"><FaShoppingCart /></p>
                   <p className="text-sm opacity-70" style={{ color: '#2C3E50' }}>
                     Keranjang masih kosong
                   </p>
@@ -508,7 +517,7 @@ Terimakasih telah berbelanja!
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-600 hover:text-red-800"
                       >
-                        ✕
+                        <FaTimes />
                       </button>
                     </div>
                     
@@ -523,7 +532,7 @@ Terimakasih telah berbelanja!
                             color: '#FFFFFF'
                           }}
                         >
-                          −
+                          <span className="text-lg">-</span>
                         </button>
                         <input
                           type="number"
@@ -545,7 +554,7 @@ Terimakasih telah berbelanja!
                             color: '#FFFFFF'
                           }}
                         >
-                          +
+                          <span className="text-lg">+</span>
                         </button>
                       </div>
                       <p className="font-bold" style={{ color: '#2C3E50' }}>
@@ -579,24 +588,24 @@ Terimakasih telah berbelanja!
                 <div className="mt-6 space-y-2">
                   <button
                     onClick={() => setShowPaymentModal(true)}
-                    className="w-full py-3 rounded-md font-bold text-lg transition-colors duration-200"
+                    className="w-full py-3 rounded-md font-bold text-lg transition-colors duration-200 flex items-center justify-center gap-2"
                     style={{ 
                       backgroundColor: '#2C3E50',
                       color: '#FFFFFF'
                     }}
                   >
-                    💳 Bayar Sekarang
+                    <FaCreditCard /> Bayar Sekarang
                   </button>
                   <button
                     onClick={() => setCart([])}
-                    className="w-full py-2 rounded-md font-medium border-2 transition-colors duration-200"
+                    className="w-full py-2 rounded-md font-medium border-2 transition-colors duration-200 flex items-center justify-center gap-2"
                     style={{ 
                       backgroundColor: 'transparent',
                       color: '#FF5722',
                       borderColor: '#FF5722'
                     }}
                   >
-                    🗑️ Kosongkan Keranjang
+                    <FaTrash /> Kosongkan Keranjang
                   </button>
                 </div>
               </>
@@ -610,15 +619,15 @@ Terimakasih telah berbelanja!
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="max-w-lg w-full rounded-lg shadow-xl p-6" style={{ backgroundColor: '#FFFFFF' }}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: '#2C3E50' }}>
-                💳 Pembayaran
+              <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                <FaCreditCard /> Pembayaran
               </h2>
               <button
                 onClick={() => setShowPaymentModal(false)}
                 className="text-2xl hover:opacity-75"
                 style={{ color: '#2C3E50' }}
               >
-                ✕
+                <FaTimes />
               </button>
             </div>
 
@@ -638,7 +647,7 @@ Terimakasih telah berbelanja!
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setPaymentMethod('cash')}
-                  className={`py-3 rounded-md font-medium transition-colors duration-200 ${
+                  className={`py-3 rounded-md font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
                     paymentMethod === 'cash' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
@@ -647,11 +656,11 @@ Terimakasih telah berbelanja!
                     ringColor: '#2C3E50'
                   }}
                 >
-                  💵 Cash
+                  <FaMoneyBillWave /> Cash
                 </button>
                 <button
                   onClick={() => setPaymentMethod('qris')}
-                  className={`py-3 rounded-md font-medium transition-colors duration-200 ${
+                  className={`py-3 rounded-md font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
                     paymentMethod === 'qris' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
@@ -660,11 +669,11 @@ Terimakasih telah berbelanja!
                     ringColor: '#2C3E50'
                   }}
                 >
-                  📱 QRIS
+                  <FaMobileAlt /> QRIS
                 </button>
                 <button
                   onClick={() => setPaymentMethod('transfer')}
-                  className={`py-3 rounded-md font-medium transition-colors duration-200 ${
+                  className={`py-3 rounded-md font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
                     paymentMethod === 'transfer' ? 'ring-2 ring-offset-2' : ''
                   }`}
                   style={{ 
@@ -673,7 +682,7 @@ Terimakasih telah berbelanja!
                     ringColor: '#2C3E50'
                   }}
                 >
-                  🏦 Transfer
+                  <FaUniversity /> Transfer
                 </button>
               </div>
             </div>
@@ -753,7 +762,7 @@ Terimakasih telah berbelanja!
                   color: 'white'
                 }}
               >
-                {processingPayment ? '⏳ Memproses...' : '✅ Konfirmasi Bayar'}
+                {processingPayment ? <><FaHourglassHalf className="inline-block mr-2" /> Memproses...</> : <><FaCheck className="inline-block mr-2" /> Konfirmasi Bayar</>}
               </button>
             </div>
           </div>
@@ -774,7 +783,7 @@ Terimakasih telah berbelanja!
       {showSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white rounded-lg p-8 shadow-lg text-center animate-bounce">
-            <div className="text-4xl mb-2 text-green-500">✅</div>
+            <div className="text-4xl mb-2 text-green-500 flex items-center justify-center"><FaCheck /></div>
             <div className="font-bold text-lg mb-1">Transaksi Selesai!</div>
             <div className="text-gray-600">Anda akan diarahkan ke halaman Transaksi Saya...</div>
           </div>
